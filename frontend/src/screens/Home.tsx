@@ -5,12 +5,8 @@ function Home() {
         className="logo-img"
         src="gildong-home.png"
         alt="네이버 부스트캠프 AI Tech"
-        style={{  maxHeight:"50vh", maxWidth:"100%" }}
+        style={{ maxHeight: "50vh", maxWidth: "100%" }}
       />
-      <p>
-        길동국사.com은 네이버 부스트캠프 AI Tech 4기 3조 Five-Guys 의 팀
-        프로젝트 사이트입니다.
-      </p>
       <p>
         한국사 문제를 사용자에게 편리하게 제공하여 어디에서나 문제를 풀 수 있고
         성적을 확인하실 수 있게 제공합니다.

@@ -8,6 +8,7 @@ import Button from "@mui/material/Button";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import {
   diffOfExamAtom,
+  isDialogOpenAtom,
   isFullTestAtom,
   isSolvingAtom,
   userUIDAtom,
@@ -54,7 +55,8 @@ function RandomSolve() {
   const [solved, setSolved] = useState(false);
   const [roundOfExam, setRoundOfExam] = useState<string>("");
   const [qNum, setQNum] = useState<number>(0);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const isDialogOpen = useRecoilValue(isDialogOpenAtom)
+  const setIsDialogOpen = useSetRecoilState(isDialogOpenAtom)
 
   useEffect(() => {
     const { randomRound, randomQNum } = getNewProblem();
@@ -215,7 +217,7 @@ function RandomSolve() {
           strokeColor="black"
           canvasColor="transparent"
           allowOnlyPointerType={pointer}
-          backgroundImage={dialogOpen?'':`https://storage.googleapis.com/gildong-k-history/${
+          backgroundImage={isDialogOpen?'':`https://storage.googleapis.com/gildong-k-history/${
             diffOfExam + "/" + roundOfExam + "/" + qNum.toString()
           }.png`}
           preserveBackgroundImageAspectRatio="xMidYMid meet"
@@ -350,7 +352,7 @@ function RandomSolve() {
                     </TableCell>
                     <TableCell>
                       <Button
-                        onClick={()=>{setDialogOpen(true)
+                        onClick={()=>{setIsDialogOpen(true)
                         console.log(pArray)}}>
                         5문항 풀기
                       </Button>
@@ -361,7 +363,7 @@ function RandomSolve() {
             </TableContainer>
           </DialogContent>
         </Dialog>
-        <Dialog fullWidth open={dialogOpen} onClose={() => setDialogOpen(false)}>
+        <Dialog fullWidth open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
           <SpecificSolve pArray={pArray} />
         </Dialog>
       </div>

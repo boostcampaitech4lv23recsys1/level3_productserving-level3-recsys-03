@@ -39,3 +39,8 @@ export const isFullTestAtom = atom({
   key: "isFullTest",
   default: true,
 });
+
+export const isDialogOpenAtom = atom({
+  key: "isDialogOpen",
+  default: false
+})

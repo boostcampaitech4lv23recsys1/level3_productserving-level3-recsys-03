@@ -37,7 +37,6 @@ function SpecificSolve(props: { pArray: Array<string> }) {
   const isFullTest = useRecoilValue(isFullTestAtom);
   const setIsSolving = useSetRecoilState(isSolvingAtom);
   const [pointer, setPointer] = useState("all");
-  const [currentQSize, setCurrentQSize] = useState(300);
   const [startTime, setStartTime] = useState(new Date().getTime());
   const [isEraseMode, setIsEraseMode] = useState(false);
   const [selected, setSelected] = useState(0);
@@ -131,7 +130,7 @@ function SpecificSolve(props: { pArray: Array<string> }) {
           strokeWidth={1}
           eraserWidth={30}
           strokeColor="black"
-          canvasColor="transparent"
+          canvasColor="white"
           allowOnlyPointerType={pointer}
           backgroundImage={`https://storage.cloud.google.com/gildong-k-history/${
             pArray[currentNum]?.slice(0, -4) +

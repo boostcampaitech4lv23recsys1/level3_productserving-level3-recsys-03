@@ -12,7 +12,7 @@ import {
   isSolvingAtom,
   userUIDAtom,
 } from "../atoms";
-import { arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { arrayUnion, doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../fbase";
 import {
   Dialog,
@@ -28,6 +28,7 @@ import {
   TableRow,
 } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
+import SpecificSolve from "./SpecificSolve";
 
 const styles = {
   border: "0.0625rem solid #9c9c9c",
@@ -45,7 +46,7 @@ function RandomSolve() {
   const [startTime, setStartTime] = useState(new Date().getTime());
   const [isEraseMode, setIsEraseMode] = useState(false);
   const [selected, setSelected] = useState(0);
-  const [pArray, setPArray] = useState<Array<String>>([]);
+  const [pArray, setPArray] = useState<Array<string>>([]);
   const [randNumArray, setRandNumArray] = useState<Array<number>>([]);
   const [currentNum, setCurrentNum] = useState(0);
   const [answer, setAnswer] = useState(0);
@@ -53,6 +54,7 @@ function RandomSolve() {
   const [solved, setSolved] = useState(false);
   const [roundOfExam, setRoundOfExam] = useState<string>("");
   const [qNum, setQNum] = useState<number>(0);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     const { randomRound, randomQNum } = getNewProblem();
@@ -69,6 +71,7 @@ function RandomSolve() {
     const newAnswer = await getDoc(doc(db, "problems", qCode));
     setAnswer(newAnswer.data()?.answer);
     setScore(newAnswer.data()?.score);
+    setPArray(newAnswer.data()?.similar)
   };
 
   const numArray = diffOfExam === "basic" ? [1, 2, 3, 4] : [1, 2, 3, 4, 5];
@@ -212,7 +215,7 @@ function RandomSolve() {
           strokeColor="black"
           canvasColor="transparent"
           allowOnlyPointerType={pointer}
-          backgroundImage={`https://storage.googleapis.com/gildong-k-history/${
+          backgroundImage={dialogOpen?'':`https://storage.googleapis.com/gildong-k-history/${
             diffOfExam + "/" + roundOfExam + "/" + qNum.toString()
           }.png`}
           preserveBackgroundImageAspectRatio="xMidYMid meet"
@@ -310,6 +313,7 @@ function RandomSolve() {
                     <TableCell>제출 답안</TableCell>
                     <TableCell>정답</TableCell>
                     <TableCell>찜하기</TableCell>
+                    <TableCell>유사 문제 풀기</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -344,11 +348,21 @@ function RandomSolve() {
                         <StarIcon />
                       </Button>
                     </TableCell>
+                    <TableCell>
+                      <Button
+                        onClick={()=>{setDialogOpen(true)
+                        console.log(pArray)}}>
+                        5문항 풀기
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>
           </DialogContent>
+        </Dialog>
+        <Dialog fullWidth open={dialogOpen} onClose={() => setDialogOpen(false)}>
+          <SpecificSolve pArray={pArray} />
         </Dialog>
       </div>
     </div>

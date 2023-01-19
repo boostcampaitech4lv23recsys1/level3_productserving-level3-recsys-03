@@ -33,8 +33,8 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { useRecoilValue } from "recoil";
-import { userUIDAtom } from "../atoms";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { isDialogOpenAtom, userUIDAtom } from "../atoms";
 import { db } from "../fbase";
 import SpecificSolve from "./SpecificSolve";
 
@@ -63,7 +63,8 @@ function Profile() {
   const [solvedOpen, setSolvedOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [jjimOpen, setJjimOpen] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const isDialogOpen = useRecoilValue(isDialogOpenAtom)
+  const setIsDialogOpen = useSetRecoilState(isDialogOpenAtom)
   const [todayOpen, setTodayOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState<Array<any>>([false, {}]);
   const [pArray, setPArray] = useState<Array<string>>([]);
@@ -129,7 +130,7 @@ function Profile() {
                 sx={{ pl: 4 }}
                 onClick={() => {
                   setPArray([p.problemCode]);
-                  setDialogOpen(true);
+                  setIsDialogOpen(true);
                 }}
               >
                 <ListItemText primary={p.problemCode} />
@@ -162,7 +163,7 @@ function Profile() {
                   sx={{ pl: 4 }}
                   onClick={() => {
                     setPArray([p.problemCode]);
-                    setDialogOpen(true);
+                    setIsDialogOpen(true);
                   }}
                 >
                   <ListItemText primary={p.problemCode} />
@@ -199,7 +200,7 @@ function Profile() {
                   sx={{ pl: 4 }}
                   onClick={() => {
                     setPArray([p]);
-                    setDialogOpen(true);
+                    setIsDialogOpen(true);
                   }}
                 >
                   <ListItemText primary={p} />
@@ -210,7 +211,7 @@ function Profile() {
         </Collapse>
       </List>
       <Button onClick={() => setTodayOpen(true)}>오늘의 공부</Button>
-      <Dialog fullWidth open={dialogOpen} onClose={() => setDialogOpen(false)}>
+      <Dialog fullWidth open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
         <SpecificSolve pArray={pArray} />
       </Dialog>
       <Dialog open={deleteOpen[0]} onClose={() => setDeleteOpen([false, []])}>

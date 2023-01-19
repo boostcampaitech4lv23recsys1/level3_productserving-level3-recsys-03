@@ -6,7 +6,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import Button from "@mui/material/Button";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { isFullTestAtom, isSolvingAtom, userUIDAtom } from "../atoms";
+import { isDialogOpenAtom, isFullTestAtom, isSolvingAtom, userUIDAtom } from "../atoms";
 import { arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../fbase";
 import {
@@ -35,9 +35,8 @@ function SpecificSolve(props: { pArray: Array<string> }) {
   const canvasRef = useRef<ReactSketchCanvasRef>(null);
   const userUID = useRecoilValue(userUIDAtom);
   const isFullTest = useRecoilValue(isFullTestAtom);
-  const setIsSolving = useSetRecoilState(isSolvingAtom);
+  const setIsDialogOpen = useSetRecoilState(isDialogOpenAtom)
   const [pointer, setPointer] = useState("all");
-  const [currentQSize, setCurrentQSize] = useState(300);
   const [startTime, setStartTime] = useState(new Date().getTime());
   const [isEraseMode, setIsEraseMode] = useState(false);
   const [selected, setSelected] = useState(0);
@@ -131,7 +130,7 @@ function SpecificSolve(props: { pArray: Array<string> }) {
           strokeWidth={1}
           eraserWidth={30}
           strokeColor="black"
-          canvasColor="transparent"
+          canvasColor="white"
           allowOnlyPointerType={pointer}
           backgroundImage={`https://storage.cloud.google.com/gildong-k-history/${
             pArray[currentNum]?.slice(0, -4) +
@@ -203,7 +202,7 @@ function SpecificSolve(props: { pArray: Array<string> }) {
         </Button>
         <Button
           variant="contained"
-          onClick={() => setIsSolving(false)}
+          onClick={() => setIsDialogOpen(false)}
           style={{ width: "20%", fontSize: "10%", marginLeft: "5px" }}
         >
           나가기
@@ -220,9 +219,11 @@ function SpecificSolve(props: { pArray: Array<string> }) {
               setCurrentNum(newCurrentNum);
               setStartTime(new Date().getTime());
               setSelected(0);
+              console.log(currentNum)
             }
             else{
-              setIsSolving(false)
+              console.log(currentNum)
+              setIsDialogOpen(false)
             }
           }}
           aria-labelledby="alert-dialog-title"

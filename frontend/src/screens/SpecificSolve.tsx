@@ -6,7 +6,12 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import Button from "@mui/material/Button";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { isDialogOpenAtom, isFullTestAtom, isSolvingAtom, userUIDAtom } from "../atoms";
+import {
+  isDialogOpenAtom,
+  isFullTestAtom,
+  isSolvingAtom,
+  userUIDAtom,
+} from "../atoms";
 import { arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../fbase";
 import {
@@ -35,7 +40,7 @@ function SpecificSolve(props: { pArray: Array<string> }) {
   const canvasRef = useRef<ReactSketchCanvasRef>(null);
   const userUID = useRecoilValue(userUIDAtom);
   const isFullTest = useRecoilValue(isFullTestAtom);
-  const setIsDialogOpen = useSetRecoilState(isDialogOpenAtom)
+  const setIsDialogOpen = useSetRecoilState(isDialogOpenAtom);
   const [pointer, setPointer] = useState("all");
   const [startTime, setStartTime] = useState(new Date().getTime());
   const [isEraseMode, setIsEraseMode] = useState(false);
@@ -214,16 +219,13 @@ function SpecificSolve(props: { pArray: Array<string> }) {
           onClose={() => {
             setSolved(false);
             const newCurrentNum = currentNum + 1;
-            if(newCurrentNum < pArray.length){
-              console.log(pArray, newCurrentNum)
+            if (newCurrentNum < pArray.length) {
+              console.log(pArray, newCurrentNum);
               setCurrentNum(newCurrentNum);
               setStartTime(new Date().getTime());
               setSelected(0);
-              console.log(currentNum)
-            }
-            else{
-              console.log(currentNum)
-              setIsDialogOpen(false)
+            } else {
+              setIsDialogOpen(false);
             }
           }}
           aria-labelledby="alert-dialog-title"
@@ -251,7 +253,10 @@ function SpecificSolve(props: { pArray: Array<string> }) {
                       selected !== answer ? { backgroundColor: "#fd7171" } : {}
                     }
                   >
-                    <TableCell>{pArray[currentNum]?.slice(-4,-2)}회 {pArray[currentNum]?.slice(-2)}번</TableCell>
+                    <TableCell>
+                      {pArray[currentNum]?.slice(-4, -2)}회{" "}
+                      {pArray[currentNum]?.slice(-2)}번
+                    </TableCell>
                     <TableCell>{selected}</TableCell>
                     <TableCell>{answer}</TableCell>
                     <TableCell>

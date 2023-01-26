@@ -378,7 +378,10 @@ function RandomSolve() {
         <Dialog
           fullWidth
           open={isDialogOpen}
-          onClose={() => setIsDialogOpen(false)}
+          onClose={() => {
+            setIsDialogOpen(false);
+            setStartTime(new Date().getTime());
+          }}
         >
           <SpecificSolve pArray={pArray} />
         </Dialog>

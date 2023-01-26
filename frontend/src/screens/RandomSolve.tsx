@@ -311,6 +311,7 @@ function RandomSolve() {
             setRoundOfExam(randomRound);
             setQNum(randomQNum);
             setSelected(0);
+            setStartTime(new Date().getTime());
           }}
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
@@ -378,7 +379,9 @@ function RandomSolve() {
         <Dialog
           fullWidth
           open={isDialogOpen}
-          onClose={() => setIsDialogOpen(false)}
+          onClose={() => {
+            setIsDialogOpen(false);
+          }}
         >
           <SpecificSolve pArray={pArray} />
         </Dialog>

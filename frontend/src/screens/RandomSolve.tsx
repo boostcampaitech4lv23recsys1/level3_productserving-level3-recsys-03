@@ -55,8 +55,8 @@ function RandomSolve() {
   const [solved, setSolved] = useState(false);
   const [roundOfExam, setRoundOfExam] = useState<string>("");
   const [qNum, setQNum] = useState<number>(0);
-  const isDialogOpen = useRecoilValue(isDialogOpenAtom)
-  const setIsDialogOpen = useSetRecoilState(isDialogOpenAtom)
+  const isDialogOpen = useRecoilValue(isDialogOpenAtom);
+  const setIsDialogOpen = useSetRecoilState(isDialogOpenAtom);
 
   useEffect(() => {
     const { randomRound, randomQNum } = getNewProblem();
@@ -73,7 +73,7 @@ function RandomSolve() {
     const newAnswer = await getDoc(doc(db, "problems", qCode));
     setAnswer(newAnswer.data()?.answer);
     setScore(newAnswer.data()?.score);
-    setPArray(newAnswer.data()?.similar)
+    setPArray(newAnswer.data()?.similar);
   };
 
   const numArray = diffOfExam === "basic" ? [1, 2, 3, 4] : [1, 2, 3, 4, 5];
@@ -217,9 +217,13 @@ function RandomSolve() {
           strokeColor="black"
           canvasColor="transparent"
           allowOnlyPointerType={pointer}
-          backgroundImage={isDialogOpen?'':`https://storage.googleapis.com/gildong-k-history/${
-            diffOfExam + "/" + roundOfExam + "/" + qNum.toString()
-          }.png`}
+          backgroundImage={
+            isDialogOpen
+              ? ""
+              : `https://storage.googleapis.com/gildong-k-history/${
+                  diffOfExam + "/" + roundOfExam + "/" + (qNum - 1).toString()
+                }.png`
+          }
           preserveBackgroundImageAspectRatio="xMidYMid meet"
         />
       </div>
@@ -235,6 +239,16 @@ function RandomSolve() {
           }}
         >
           {isEraseMode ? "펜" : "지우개"}
+        </Button>
+        <Button
+          size="small"
+          variant="contained"
+          style={{ marginLeft: "5px", marginRight: "10px", fontSize: "0.5rem" }}
+          onClick={() => {
+            canvasRef.current?.clearCanvas();
+          }}
+        >
+          모두 지우기
         </Button>
         <FormControlLabel
           control={
@@ -351,9 +365,7 @@ function RandomSolve() {
                       </Button>
                     </TableCell>
                     <TableCell>
-                      <Button
-                        onClick={()=>{setIsDialogOpen(true)
-                        console.log(pArray)}}>
+                      <Button onClick={() => setIsDialogOpen(true)}>
                         5문항 풀기
                       </Button>
                     </TableCell>
@@ -363,7 +375,11 @@ function RandomSolve() {
             </TableContainer>
           </DialogContent>
         </Dialog>
-        <Dialog fullWidth open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
+        <Dialog
+          fullWidth
+          open={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+        >
           <SpecificSolve pArray={pArray} />
         </Dialog>
       </div>

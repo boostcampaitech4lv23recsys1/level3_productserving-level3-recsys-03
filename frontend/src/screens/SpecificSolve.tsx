@@ -160,6 +160,16 @@ function SpecificSolve(props: { pArray: Array<string> }) {
         >
           {isEraseMode ? "펜" : "지우개"}
         </Button>
+        <Button
+          size="small"
+          variant="contained"
+          style={{ marginLeft: "5px", marginRight: "10px", fontSize: "0.5rem" }}
+          onClick={() => {
+            canvasRef.current?.clearCanvas();
+          }}
+        >
+          모두 지우기
+        </Button>
         <FormControlLabel
           control={
             <Switch

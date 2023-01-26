@@ -261,6 +261,16 @@ function FullTestSolve() {
         >
           {isEraseMode ? "펜" : "지우개"}
         </Button>
+        <Button
+          size="small"
+          variant="contained"
+          style={{ marginLeft: "5px", marginRight: "10px", fontSize: "0.5rem" }}
+          onClick={() => {
+            canvasRef.current?.clearCanvas();
+          }}
+        >
+          모두 지우기
+        </Button>
         <FormControlLabel
           control={
             <Switch
@@ -271,7 +281,7 @@ function FullTestSolve() {
               inputProps={{ "aria-label": "controlled" }}
             />
           }
-          label="손가락으로 쓰기"
+          label="필기 모드"
         />
       </div>
       <div style={{ textAlign: "center" }}>

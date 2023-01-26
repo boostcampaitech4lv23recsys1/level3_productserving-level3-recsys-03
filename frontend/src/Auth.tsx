@@ -16,15 +16,15 @@ const Auth = () => {
       .then(async (result) => {
         const user = result.user;
         console.log(user);
-        if(user.metadata.creationTime === user.metadata.lastSignInTime){
-          try{
+        if (user.metadata.creationTime === user.metadata.lastSignInTime) {
+          try {
             await setDoc(doc(db, "users", user.uid), {
               uid: user.uid,
               solved: [],
-              incorrect: []
-            })
-          } catch(e){
-            console.error(e)
+              incorrect: [],
+            });
+          } catch (e) {
+            console.error(e);
           }
         }
       })
@@ -36,7 +36,7 @@ const Auth = () => {
         console.log(errorCode, errorMessage, email, credential);
       });
   };
-  
+
   const onClick = () => {
     signInWithGoogle();
     console.log("click");
@@ -44,7 +44,7 @@ const Auth = () => {
   return (
     <div>
       <div>
-        <button onClick={onClick}>Continue with Google Login</button>
+        <button onClick={onClick}>Google 계정으로 로그인</button>
       </div>
     </div>
   );

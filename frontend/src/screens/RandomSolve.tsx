@@ -221,7 +221,7 @@ function RandomSolve() {
             isDialogOpen
               ? ""
               : `https://storage.googleapis.com/gildong-k-history/${
-                  diffOfExam + "/" + roundOfExam + "/" + (qNum-1).toString()
+                  diffOfExam + "/" + roundOfExam + "/" + (qNum - 1).toString()
                 }.png`
           }
           preserveBackgroundImageAspectRatio="xMidYMid meet"
@@ -239,6 +239,16 @@ function RandomSolve() {
           }}
         >
           {isEraseMode ? "펜" : "지우개"}
+        </Button>
+        <Button
+          size="small"
+          variant="contained"
+          style={{ marginLeft: "5px", marginRight: "10px", fontSize: "0.5rem" }}
+          onClick={() => {
+            canvasRef.current?.clearCanvas();
+          }}
+        >
+          모두 지우기
         </Button>
         <FormControlLabel
           control={

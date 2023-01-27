@@ -8,6 +8,8 @@ import Solve from "./screens/FullTestSolve";
 import Profile from "./screens/Profile";
 import Auth from "./Auth";
 
+import AI from "./screens/AI";
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -36,6 +38,10 @@ const router = createBrowserRouter([
       {
         path: "auth",
         element: <Auth />,
+      },
+      {
+        path: "ai",
+        element: <AI />,
       },
     ],
   },

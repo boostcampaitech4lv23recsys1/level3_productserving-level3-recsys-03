@@ -13,7 +13,14 @@ import {
   isSolvingAtom,
   userUIDAtom,
 } from "../atoms";
-import { arrayUnion, doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  arrayRemove,
+  arrayUnion,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../fbase";
 import {
   Dialog,
@@ -29,6 +36,8 @@ import {
   TableRow,
 } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
+
 import SpecificSolve from "./SpecificSolve";
 
 const styles = {
@@ -58,6 +67,8 @@ function RandomSolve() {
   const isDialogOpen = useRecoilValue(isDialogOpenAtom);
   const setIsDialogOpen = useSetRecoilState(isDialogOpenAtom);
 
+  const [jjimArray, setJjimArray] = useState<Array<string>>([]);
+
   useEffect(() => {
     const { randomRound, randomQNum } = getNewProblem();
     setRoundOfExam(randomRound);
@@ -67,6 +78,10 @@ function RandomSolve() {
   useEffect(() => {
     getAnswer();
   }, [qNum]);
+
+  useEffect(() => {
+    getJjimList();
+  }, [jjimArray]);
 
   const getAnswer = async () => {
     const qCode = diffOfExam + roundOfExam + qNum?.toString().padStart(2, "0");
@@ -185,6 +200,32 @@ function RandomSolve() {
     canvasRef.current?.clearCanvas();
     setSolved(true);
   };
+
+  const getJjimList = async () => {
+    const profile = await getDoc(doc(db, "users", String(userUID)));
+    if (profile.exists()) {
+      setJjimArray(profile.data().jjimlist);
+    }
+  };
+
+  const deleteJjimList = async (p: string) => {
+    await updateDoc(doc(db, "users", String(userUID)), {
+      jjimlist: arrayRemove(p),
+    });
+    setJjimArray([...jjimArray].filter((x) => x !== p));
+  };
+
+  const addJjimList = async (p: string) => {
+    await setDoc(
+      doc(db, "users", String(userUID)),
+      {
+        jjimlist: arrayUnion(p),
+      },
+      { merge: true }
+    );
+    setJjimArray([...jjimArray, p]);
+  };
+
   return (
     <div
       style={{
@@ -340,29 +381,33 @@ function RandomSolve() {
                     }
                   >
                     <TableCell>
-                      {diffOfExam +
-                        roundOfExam +
-                        qNum?.toString().padStart(2, "0")}
+                      {`${diffOfExam === "basic" ? "기본" : "심화"} 
+                          ${roundOfExam}회
+                          ${qNum?.toString().padStart(2, "0")}번`}
                     </TableCell>
                     <TableCell>{selected}</TableCell>
                     <TableCell>{answer}</TableCell>
                     <TableCell>
                       <Button
-                        onClick={async () => {
-                          await setDoc(
-                            doc(db, "users", String(userUID)),
-                            {
-                              jjimlist: arrayUnion(
-                                diffOfExam +
-                                  roundOfExam +
-                                  qNum?.toString().padStart(2, "0")
-                              ),
-                            },
-                            { merge: true }
-                          );
+                        onClick={() => {
+                          const p =
+                            diffOfExam +
+                            roundOfExam +
+                            qNum.toString().padStart(2, "0");
+                          jjimArray?.indexOf(p) === -1
+                            ? addJjimList(p)
+                            : deleteJjimList(p);
                         }}
                       >
-                        <StarIcon />
+                        {jjimArray?.indexOf(
+                          diffOfExam +
+                            roundOfExam +
+                            qNum.toString().padStart(2, "0")
+                        ) === -1 ? (
+                          <StarBorderIcon />
+                        ) : (
+                          <StarIcon />
+                        )}
                       </Button>
                     </TableCell>
                     <TableCell>

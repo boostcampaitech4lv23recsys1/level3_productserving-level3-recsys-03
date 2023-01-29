@@ -58,6 +58,7 @@ function SpecificSolve(props: { pArray: Array<string> }) {
   const [solved, setSolved] = useState(false);
 
   const [jjimArray, setJjimArray] = useState<Array<string>>([]);
+  const [link, setLink] = useState<URL>();
 
   useEffect(() => {
     getAnswer();
@@ -67,6 +68,7 @@ function SpecificSolve(props: { pArray: Array<string> }) {
       doc(db, "problems", String(pArray[currentNum]))
     );
     setAnswer(newAnswer.data()?.answer);
+    setLink(newAnswer.data()?.commentLink);
   };
   const diffOfExam = pArray[currentNum]?.slice(0, -4);
   const numArray = diffOfExam === "basic" ? [1, 2, 3, 4] : [1, 2, 3, 4, 5];
@@ -297,6 +299,7 @@ function SpecificSolve(props: { pArray: Array<string> }) {
                     <TableCell>문항 번호</TableCell>
                     <TableCell>제출 답안</TableCell>
                     <TableCell>정답</TableCell>
+                    <TableCell>해설</TableCell>
                     <TableCell>찜하기</TableCell>
                   </TableRow>
                 </TableHead>
@@ -312,6 +315,13 @@ function SpecificSolve(props: { pArray: Array<string> }) {
                     </TableCell>
                     <TableCell>{selected}</TableCell>
                     <TableCell>{answer}</TableCell>
+                    <TableCell
+                      onClick={() => {
+                        window.open(link, "_blank");
+                      }}
+                    >
+                      link
+                    </TableCell>
                     <TableCell>
                       <Button
                         onClick={() => {

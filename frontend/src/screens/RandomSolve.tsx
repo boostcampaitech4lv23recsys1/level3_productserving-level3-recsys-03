@@ -68,6 +68,7 @@ function RandomSolve() {
   const setIsDialogOpen = useSetRecoilState(isDialogOpenAtom);
 
   const [jjimArray, setJjimArray] = useState<Array<string>>([]);
+  const [link, setLink] = useState<URL>();
 
   useEffect(() => {
     const { randomRound, randomQNum } = getNewProblem();
@@ -89,6 +90,7 @@ function RandomSolve() {
     setAnswer(newAnswer.data()?.answer);
     setScore(newAnswer.data()?.score);
     setPArray(newAnswer.data()?.similar);
+    setLink(newAnswer.data()?.commentLink);
   };
 
   const numArray = diffOfExam === "basic" ? [1, 2, 3, 4] : [1, 2, 3, 4, 5];
@@ -370,6 +372,7 @@ function RandomSolve() {
                     <TableCell>문항 번호</TableCell>
                     <TableCell>제출 답안</TableCell>
                     <TableCell>정답</TableCell>
+                    <TableCell>해설</TableCell>
                     <TableCell>찜하기</TableCell>
                     <TableCell>유사 문제 풀기</TableCell>
                   </TableRow>
@@ -387,6 +390,13 @@ function RandomSolve() {
                     </TableCell>
                     <TableCell>{selected}</TableCell>
                     <TableCell>{answer}</TableCell>
+                    <TableCell
+                      onClick={() => {
+                        window.open(link, "_blank");
+                      }}
+                    >
+                      link
+                    </TableCell>
                     <TableCell>
                       <Button
                         onClick={() => {

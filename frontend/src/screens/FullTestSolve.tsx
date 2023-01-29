@@ -61,7 +61,7 @@ function FullTestSolve() {
   const [restTime, setRestTime] = useState("");
   const [isEraseMode, setIsEraseMode] = useState(false);
   const [testInfo, setTestInfo] = useState<
-    Array<{ answer: Number; score: Number }>
+    Array<{ answer: Number; score: Number; commentLink: URL }>
   >([]);
   const [isFinish, setIsFinish] = useState(false);
   const numArray = diffOfExam === "basic" ? [1, 2, 3, 4] : [1, 2, 3, 4, 5];
@@ -215,6 +215,7 @@ function FullTestSolve() {
         qArray.push({
           answer: docSnap.data().answer,
           score: docSnap.data().score,
+          commentLink: docSnap.data().commentLink,
         });
       }
     }
@@ -396,6 +397,7 @@ function FullTestSolve() {
                     <TableCell>문항 번호</TableCell>
                     <TableCell>제출 답안</TableCell>
                     <TableCell>정답</TableCell>
+                    <TableCell>해설</TableCell>
                     <TableCell>배점</TableCell>
                     <TableCell>찜하기</TableCell>
                   </TableRow>
@@ -411,6 +413,13 @@ function FullTestSolve() {
                     >
                       <TableCell>{`${i + 1}번`}</TableCell>
                       <TableCell>{answerArray[i + 1]}</TableCell>
+                      <TableCell
+                        onClick={() => {
+                          window.open(q.commentLink, "_blank");
+                        }}
+                      >
+                        link
+                      </TableCell>
                       <TableCell>{String(q.answer)}</TableCell>
                       <TableCell>{String(q.score)}</TableCell>
                       <TableCell>

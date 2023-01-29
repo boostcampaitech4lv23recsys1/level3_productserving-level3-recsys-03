@@ -413,6 +413,7 @@ function FullTestSolve() {
                     >
                       <TableCell>{`${i + 1}번`}</TableCell>
                       <TableCell>{answerArray[i + 1]}</TableCell>
+                      <TableCell>{String(q.answer)}</TableCell>
                       <TableCell
                         onClick={() => {
                           window.open(q.commentLink, "_blank");
@@ -420,7 +421,6 @@ function FullTestSolve() {
                       >
                         link
                       </TableCell>
-                      <TableCell>{String(q.answer)}</TableCell>
                       <TableCell>{String(q.score)}</TableCell>
                       <TableCell>
                         <Button

@@ -12,7 +12,14 @@ import {
   isSolvingAtom,
   userUIDAtom,
 } from "../atoms";
-import { arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import {
+  arrayRemove,
+  arrayUnion,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../fbase";
 import {
   Dialog,
@@ -28,6 +35,7 @@ import {
   TableRow,
 } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
 
 const styles = {
   border: "0.0625rem solid #9c9c9c",
@@ -49,6 +57,8 @@ function SpecificSolve(props: { pArray: Array<string> }) {
   const [answer, setAnswer] = useState(0);
   const [solved, setSolved] = useState(false);
 
+  const [jjimArray, setJjimArray] = useState<Array<string>>([]);
+
   useEffect(() => {
     getAnswer();
   }, [currentNum, pArray]);
@@ -60,6 +70,10 @@ function SpecificSolve(props: { pArray: Array<string> }) {
   };
   const diffOfExam = pArray[currentNum]?.slice(0, -4);
   const numArray = diffOfExam === "basic" ? [1, 2, 3, 4] : [1, 2, 3, 4, 5];
+
+  useEffect(() => {
+    getJjimList();
+  }, [jjimArray]);
 
   const handleClickNextButton = async () => {
     const endTime = new Date().getTime();
@@ -109,6 +123,31 @@ function SpecificSolve(props: { pArray: Array<string> }) {
     });
     canvasRef.current?.clearCanvas();
     setSolved(true);
+  };
+
+  const getJjimList = async () => {
+    const profile = await getDoc(doc(db, "users", String(userUID)));
+    if (profile.exists()) {
+      setJjimArray(profile.data().jjimlist);
+    }
+  };
+
+  const deleteJjimList = async (p: string) => {
+    await updateDoc(doc(db, "users", String(userUID)), {
+      jjimlist: arrayRemove(p),
+    });
+    setJjimArray([...jjimArray].filter((x) => x !== p));
+  };
+
+  const addJjimList = async (p: string) => {
+    await setDoc(
+      doc(db, "users", String(userUID)),
+      {
+        jjimlist: arrayUnion(p),
+      },
+      { merge: true }
+    );
+    setJjimArray([...jjimArray, p]);
   };
 
   return (
@@ -242,7 +281,11 @@ function SpecificSolve(props: { pArray: Array<string> }) {
           aria-describedby="alert-dialog-description"
         >
           <DialogTitle>
-            {`${pArray[currentNum]} 테스트 결과 : ${
+            {`${
+              pArray[currentNum].slice(0, -4) === "basic" ? "기본" : "심화"
+            } ${pArray[currentNum].slice(-4, -2)}회 ${pArray[currentNum].slice(
+              -2
+            )}번 테스트 결과 : ${
               answer === selected ? "정답입니다" : "틀렸습니다"
             }`}
           </DialogTitle>
@@ -271,17 +314,18 @@ function SpecificSolve(props: { pArray: Array<string> }) {
                     <TableCell>{answer}</TableCell>
                     <TableCell>
                       <Button
-                        onClick={async () => {
-                          await setDoc(
-                            doc(db, "users", String(userUID)),
-                            {
-                              jjimlist: arrayUnion(pArray[currentNum]),
-                            },
-                            { merge: true }
-                          );
+                        onClick={() => {
+                          const p = pArray[currentNum];
+                          jjimArray?.indexOf(p) === -1
+                            ? addJjimList(p)
+                            : deleteJjimList(p);
                         }}
                       >
-                        <StarIcon />
+                        {jjimArray?.indexOf(pArray[currentNum]) === -1 ? (
+                          <StarBorderIcon />
+                        ) : (
+                          <StarIcon />
+                        )}
                       </Button>
                     </TableCell>
                   </TableRow>

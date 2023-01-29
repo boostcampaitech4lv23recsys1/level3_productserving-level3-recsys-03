@@ -13,7 +13,14 @@ import {
   userUIDAtom,
   diffOfExamAtom,
 } from "../atoms";
-import { arrayUnion, doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  arrayRemove,
+  arrayUnion,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../fbase";
 import {
   Dialog,
@@ -29,6 +36,7 @@ import {
   TableRow,
 } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
 
 const styles = {
   border: "0.0625rem solid #9c9c9c",
@@ -57,6 +65,9 @@ function FullTestSolve() {
   >([]);
   const [isFinish, setIsFinish] = useState(false);
   const numArray = diffOfExam === "basic" ? [1, 2, 3, 4] : [1, 2, 3, 4, 5];
+
+  const [jjimArray, setJjimArray] = useState<Array<string>>([]);
+
   useEffect(() => {
     const id = setInterval(() => {
       const newCurrentTime = new Date().getTime();
@@ -83,6 +94,17 @@ function FullTestSolve() {
   useEffect(() => {
     handleSolvingChange();
   }, [isFinish]);
+
+  useEffect(() => {
+    getJjimList();
+  }, [jjimArray]);
+
+  const getJjimList = async () => {
+    const profile = await getDoc(doc(db, "users", String(userUID)));
+    if (profile.exists()) {
+      setJjimArray(profile.data().jjimlist);
+    }
+  };
 
   const handleClickNextButton = () => {
     const newTimeArray: any = [...timeArray];
@@ -207,6 +229,24 @@ function FullTestSolve() {
       }
     });
     return totalScore;
+  };
+
+  const deleteJjimList = async (p: string) => {
+    await updateDoc(doc(db, "users", String(userUID)), {
+      jjimlist: arrayRemove(p),
+    });
+    setJjimArray([...jjimArray].filter((x) => x !== p));
+  };
+
+  const addJjimList = async (p: string) => {
+    await setDoc(
+      doc(db, "users", String(userUID)),
+      {
+        jjimlist: arrayUnion(p),
+      },
+      { merge: true }
+    );
+    setJjimArray([...jjimArray, p]);
   };
 
   return (
@@ -344,7 +384,9 @@ function FullTestSolve() {
           aria-describedby="alert-dialog-description"
         >
           <DialogTitle>
-            {`${examCode} 테스트 결과 : ${totalScore()}점`}
+            {`${
+              examCode.slice(0, -4) === "basic" ? "기본" : "심화"
+            } ${examCode.slice(-4)} 테스트 결과 : ${totalScore()}점`}
           </DialogTitle>
           <DialogContent>
             <TableContainer component={Paper}>
@@ -373,19 +415,25 @@ function FullTestSolve() {
                       <TableCell>{String(q.score)}</TableCell>
                       <TableCell>
                         <Button
-                          onClick={async () => {
-                            await setDoc(
-                              doc(db, "users", String(userUID)),
-                              {
-                                jjimlist: arrayUnion(
-                                  Number(String(examCode) + String(i + 1))
-                                ),
-                              },
-                              { merge: true }
-                            );
+                          onClick={() => {
+                            const p =
+                              diffOfExam +
+                              roundOfExam +
+                              (i + 1).toString().padStart(2, "0");
+                            jjimArray?.indexOf(p) === -1
+                              ? addJjimList(p)
+                              : deleteJjimList(p);
                           }}
                         >
-                          <StarIcon />
+                          {jjimArray?.indexOf(
+                            diffOfExam +
+                              roundOfExam +
+                              (i + 1).toString().padStart(2, "0")
+                          ) === -1 ? (
+                            <StarBorderIcon />
+                          ) : (
+                            <StarIcon />
+                          )}
                         </Button>
                       </TableCell>
                     </TableRow>

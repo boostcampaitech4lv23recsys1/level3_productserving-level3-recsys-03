@@ -63,8 +63,8 @@ function Profile() {
   const [solvedOpen, setSolvedOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [jjimOpen, setJjimOpen] = useState(false);
-  const isDialogOpen = useRecoilValue(isDialogOpenAtom)
-  const setIsDialogOpen = useSetRecoilState(isDialogOpenAtom)
+  const isDialogOpen = useRecoilValue(isDialogOpenAtom);
+  const setIsDialogOpen = useSetRecoilState(isDialogOpenAtom);
   const [todayOpen, setTodayOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState<Array<any>>([false, {}]);
   const [pArray, setPArray] = useState<Array<string>>([]);
@@ -73,6 +73,10 @@ function Profile() {
   useEffect(() => {
     getProfile();
   }, [deleteOpen]);
+
+  useEffect(() => {
+    getJjimList();
+  }, [jjimArray]);
 
   const getProfile = async () => {
     const profile = await getDoc(doc(db, "users", String(userUID)));
@@ -86,6 +90,13 @@ function Profile() {
         })
       );
       setSolvedArray(profile.data().solved);
+      setJjimArray(profile.data().jjimlist);
+    }
+  };
+
+  const getJjimList = async () => {
+    const profile = await getDoc(doc(db, "users", String(userUID)));
+    if (profile.exists()) {
       setJjimArray(profile.data().jjimlist);
     }
   };
@@ -111,7 +122,7 @@ function Profile() {
         aria-labelledby="nested-list-subheader"
         subheader={
           <ListSubheader component="div" id="nested-list-subheader">
-            공부
+            공부 기록
           </ListSubheader>
         }
       >
@@ -133,7 +144,13 @@ function Profile() {
                   setIsDialogOpen(true);
                 }}
               >
-                <ListItemText primary={p.problemCode} />
+                <ListItemText
+                  primary={`${
+                    p.problemCode.slice(0, -4) === "basic" ? "기본" : "심화"
+                  } ${p.problemCode.slice(-4, -2)}회 ${p.problemCode.slice(
+                    -2
+                  )}번`}
+                />
               </ListItemButton>
             ))}
           </List>
@@ -166,7 +183,13 @@ function Profile() {
                     setIsDialogOpen(true);
                   }}
                 >
-                  <ListItemText primary={p.problemCode} />
+                  <ListItemText
+                    primary={`${
+                      p.problemCode.slice(0, -4) === "basic" ? "기본" : "심화"
+                    } ${p.problemCode.slice(-4, -2)}회 ${p.problemCode.slice(
+                      -2
+                    )}번`}
+                  />
                 </ListItemButton>
               </ListItem>
             ))}
@@ -203,7 +226,11 @@ function Profile() {
                     setIsDialogOpen(true);
                   }}
                 >
-                  <ListItemText primary={p} />
+                  <ListItemText
+                    primary={`${
+                      p.slice(0, -4) === "basic" ? "기본" : "심화"
+                    } ${p.slice(-4, -2)}회 ${p.slice(-2)}번`}
+                  />
                 </ListItemButton>
               </ListItem>
             ))}
@@ -211,7 +238,11 @@ function Profile() {
         </Collapse>
       </List>
       <Button onClick={() => setTodayOpen(true)}>오늘의 공부</Button>
-      <Dialog fullWidth open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
+      <Dialog
+        fullWidth
+        open={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+      >
         <SpecificSolve pArray={pArray} />
       </Dialog>
       <Dialog open={deleteOpen[0]} onClose={() => setDeleteOpen([false, []])}>
@@ -254,13 +285,16 @@ function Profile() {
             <Typography color="text.secondary">
               {String(new Date()).slice(0, 15)}의 공부
             </Typography>
-            <Typography variant="h5">푼 문항 수 : </Typography>
-            <Typography>{todaySolved.length} 문제</Typography>
-            <Typography variant="h5">정답률 :</Typography>
-            <Typography>
-              {(todaySolved.filter((x) => x.isCorrect).length /
-                todaySolved.length) *
-                100}
+            <Typography variant="h5">
+              오늘 푼 문항 수 : {todaySolved.length} 문제
+            </Typography>
+            <Typography variant="h5">
+              정답률 :{" "}
+              {Math.ceil(
+                (todaySolved.filter((x) => x.isCorrect).length /
+                  todaySolved.length) *
+                  100
+              )}
               %
             </Typography>
             <Typography variant="h5">푼 문제 :</Typography>
@@ -277,7 +311,14 @@ function Profile() {
                   <TableBody>
                     {todaySolved.map((p) => (
                       <TableRow>
-                        <TableCell>{p.problemCode}</TableCell>
+                        <TableCell>{`${
+                          p.problemCode.slice(0, -4) === "basic"
+                            ? "기본"
+                            : "심화"
+                        } ${p.problemCode.slice(
+                          -4,
+                          -2
+                        )}회 ${p.problemCode.slice(-2)}번`}</TableCell>
                         <TableCell>{p.timetaken / 1000}초</TableCell>
                         <TableCell>{p.isCorrect ? "O" : "X"}</TableCell>
                       </TableRow>

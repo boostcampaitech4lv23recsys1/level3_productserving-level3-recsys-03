@@ -212,7 +212,7 @@ function Profile() {
                       await updateDoc(doc(db, "users", String(userUID)), {
                         jjimlist: arrayRemove(p),
                       });
-                      setJjimArray([...jjimArray].filter((x) => x !== p));
+                      setJjimArray([...jjimArray]?.filter((x) => x !== p));
                     }}
                   >
                     <DeleteIcon />

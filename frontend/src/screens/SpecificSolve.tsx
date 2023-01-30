@@ -75,7 +75,7 @@ function SpecificSolve(props: { pArray: Array<string> }) {
 
   useEffect(() => {
     getJjimList();
-  }, [jjimArray]);
+  }, []);
 
   const handleClickNextButton = async () => {
     const endTime = new Date().getTime();
@@ -138,7 +138,7 @@ function SpecificSolve(props: { pArray: Array<string> }) {
     await updateDoc(doc(db, "users", String(userUID)), {
       jjimlist: arrayRemove(p),
     });
-    setJjimArray([...jjimArray].filter((x) => x !== p));
+    getJjimList();
   };
 
   const addJjimList = async (p: string) => {
@@ -149,7 +149,7 @@ function SpecificSolve(props: { pArray: Array<string> }) {
       },
       { merge: true }
     );
-    setJjimArray([...jjimArray, p]);
+    getJjimList();
   };
 
   return (

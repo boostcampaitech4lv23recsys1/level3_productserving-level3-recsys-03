@@ -97,7 +97,7 @@ function FullTestSolve() {
 
   useEffect(() => {
     getJjimList();
-  }, [jjimArray]);
+  }, []);
 
   const getJjimList = async () => {
     const profile = await getDoc(doc(db, "users", String(userUID)));
@@ -236,7 +236,7 @@ function FullTestSolve() {
     await updateDoc(doc(db, "users", String(userUID)), {
       jjimlist: arrayRemove(p),
     });
-    setJjimArray([...jjimArray].filter((x) => x !== p));
+    getJjimList();
   };
 
   const addJjimList = async (p: string) => {
@@ -247,7 +247,7 @@ function FullTestSolve() {
       },
       { merge: true }
     );
-    setJjimArray([...jjimArray, p]);
+    getJjimList();
   };
 
   return (

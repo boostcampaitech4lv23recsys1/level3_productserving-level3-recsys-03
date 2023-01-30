@@ -6,6 +6,8 @@ import { isDialogOpenAtom, userUIDAtom } from "../atoms";
 import { db } from "../fbase";
 import SpecificSolve from "./SpecificSolve";
 
+import LoadingIcons from "react-loading-icons";
+
 function AI() {
   const userUID = useRecoilValue(userUIDAtom);
   const [recProblem, setRecProblem] = useState<Array<string>>([]);
@@ -21,12 +23,14 @@ function AI() {
   const isDialogOpen = useRecoilValue(isDialogOpenAtom);
   const setIsDialogOpen = useSetRecoilState(isDialogOpenAtom);
 
+  const [isLoading, setIsLoading] = useState<Boolean>(false);
+
   useEffect(() => {
     getProfile();
   }, []);
 
   useEffect(() => {
-    if (incorrectArray.length > 0) {
+    if (incorrectArray.length > 5) {
       getAnswer();
     }
   }, [incorrectArray]);
@@ -55,12 +59,13 @@ function AI() {
     const newRecProblem = [];
     while (randNumArr.length > 0) {
       const newAnswer = await getDoc(
-        doc(db, "problems", incorrectArray[randNumArr?.pop()]?.problemCode)
+        doc(db, "problems", incorrectArray[randNumArr.pop()]?.problemCode)
       );
       const newProblem = newAnswer.data()?.similar;
       newRecProblem.push(newProblem[Math.floor(Math.random() * 5)]);
     }
     setRecProblem(newRecProblem);
+    setIsLoading(true);
   };
 
   return (
@@ -72,15 +77,19 @@ function AI() {
           더 풀어주세요.
         </p>
         <p>오답이 5문제 이상일 때 정상적으로 추천이 됩니다.</p>
-        <Button
-          style={{ backgroundColor: "#D5BCA2", color: "#37190F" }}
-          variant="contained"
-          onClick={() => {
-            setIsDialogOpen(true);
-          }}
-        >
-          AI 추천 문제
-        </Button>
+        {isLoading ? (
+          <Button
+            style={{ backgroundColor: "#D5BCA2", color: "#37190F" }}
+            variant="contained"
+            onClick={() => {
+              setIsDialogOpen(true);
+            }}
+          >
+            AI 추천 문제
+          </Button>
+        ) : (
+          <LoadingIcons.Grid fill="#D5BCA2" />
+        )}
       </div>
       <Dialog
         fullWidth

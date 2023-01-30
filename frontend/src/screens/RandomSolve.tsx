@@ -82,7 +82,7 @@ function RandomSolve() {
 
   useEffect(() => {
     getJjimList();
-  }, [jjimArray]);
+  }, []);
 
   const getAnswer = async () => {
     const qCode = diffOfExam + roundOfExam + qNum?.toString().padStart(2, "0");
@@ -214,7 +214,7 @@ function RandomSolve() {
     await updateDoc(doc(db, "users", String(userUID)), {
       jjimlist: arrayRemove(p),
     });
-    setJjimArray([...jjimArray].filter((x) => x !== p));
+    getJjimList();
   };
 
   const addJjimList = async (p: string) => {
@@ -225,7 +225,7 @@ function RandomSolve() {
       },
       { merge: true }
     );
-    setJjimArray([...jjimArray, p]);
+    getJjimList();
   };
 
   return (

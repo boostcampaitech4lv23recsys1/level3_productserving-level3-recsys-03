@@ -71,25 +71,35 @@ function AI() {
   return (
     <>
       <div style={{ margin: "0 0 5px 0", textAlign: "center" }}>
-        <p>최근에 틀린 문제를 바탕으로 틀릴만한 문제를 AI가 추천해 줍니다.</p>
-        <p>
-          문제가 뜨지 않거나 똑같은 문제가 계속 뜬다면 '문제 풀기'로 가서 문제를
-          더 풀어주세요.
-        </p>
-        <p>오답이 5문제 이상일 때 정상적으로 추천이 됩니다.</p>
-        {isLoading ? (
-          <Button
-            style={{ backgroundColor: "#D5BCA2", color: "#37190F" }}
-            variant="contained"
-            onClick={() => {
-              setIsDialogOpen(true);
-            }}
-          >
-            AI 추천 문제
-          </Button>
-        ) : (
-          <LoadingIcons.Grid fill="#D5BCA2" />
-        )}
+        <div>
+          <img
+            className="gildong-ai-class"
+            src="gildong-ai.png"
+            alt="길동 ai"
+            style={{ maxHeight: "50vh", maxWidth: "100%" }}
+          />
+        </div>
+        <div>
+          <p></p>
+          {isLoading ? (
+            <Button
+              style={{
+                width: "120px",
+                height: "80px",
+                backgroundColor: "#D5BCA2",
+                color: "#37190F",
+              }}
+              variant="contained"
+              onClick={() => {
+                setIsDialogOpen(true);
+              }}
+            >
+              AI 추천 문제
+            </Button>
+          ) : (
+            <LoadingIcons.Grid fill="#D5BCA2" />
+          )}
+        </div>
       </div>
       <Dialog
         fullWidth

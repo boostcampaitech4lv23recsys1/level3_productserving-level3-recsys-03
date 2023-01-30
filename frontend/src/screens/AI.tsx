@@ -24,13 +24,20 @@ function AI() {
   useEffect(() => {
     getProfile();
   }, []);
+
   useEffect(() => {
-    getAnswer();
+    if (incorrectArray.length > 0) {
+      getAnswer();
+    }
   }, [incorrectArray]);
+
   const getProfile = async () => {
     const profile = await getDoc(doc(db, "users", String(userUID)));
     if (profile.exists()) {
-      const incorrect = profile.data().incorrect;
+      const solved = profile.data().solved;
+      const incorrect = solved
+        .slice(-100)
+        .filter((x: { isCorrect: boolean }) => !x.isCorrect);
       setIncorrectArray(incorrect);
     }
   };
@@ -39,21 +46,23 @@ function AI() {
     const randNumSet = new Set();
     // 수정 필요
     const incorrectArrayLength = incorrectArray.length;
+    console.log(incorrectArrayLength);
     while (randNumSet.size < 5) {
-      randNumSet.add(Math.floor(Math.random() * 10));
+      randNumSet.add(Math.floor(Math.random() * incorrectArrayLength));
     }
     const randNumArr: Array<any> = Array.from(randNumSet);
     console.log(randNumArr);
     const newRecProblem = [];
     while (randNumArr.length > 0) {
       const newAnswer = await getDoc(
-        doc(db, "problems", incorrectArray[randNumArr.pop()].problemCode)
+        doc(db, "problems", incorrectArray[randNumArr?.pop()]?.problemCode)
       );
       const newProblem = newAnswer.data()?.similar;
       newRecProblem.push(newProblem[Math.floor(Math.random() * 5)]);
     }
     setRecProblem(newRecProblem);
   };
+
   return (
     <>
       <div style={{ margin: "0 0 5px 0", textAlign: "center" }}>

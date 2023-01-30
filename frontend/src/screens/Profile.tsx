@@ -146,8 +146,8 @@ function Profile() {
               >
                 <ListItemText
                   primary={`${
-                    p.problemCode.slice(0, -4) === "basic" ? "기본" : "심화"
-                  } ${p.problemCode.slice(-4, -2)}회 ${p.problemCode.slice(
+                    p.problemCode?.slice(0, -4) === "basic" ? "기본" : "심화"
+                  } ${p.problemCode?.slice(-4, -2)}회 ${p.problemCode?.slice(
                     -2
                   )}번`}
                 />
@@ -185,8 +185,8 @@ function Profile() {
                 >
                   <ListItemText
                     primary={`${
-                      p.problemCode.slice(0, -4) === "basic" ? "기본" : "심화"
-                    } ${p.problemCode.slice(-4, -2)}회 ${p.problemCode.slice(
+                      p.problemCode?.slice(0, -4) === "basic" ? "기본" : "심화"
+                    } ${p.problemCode?.slice(-4, -2)}회 ${p.problemCode?.slice(
                       -2
                     )}번`}
                   />
@@ -201,7 +201,7 @@ function Profile() {
         </ListItemButton>
         <Collapse in={jjimOpen} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            {jjimArray?.map((p) => (
+            {jjimArray?.filter((x)=>x).map((p) => (
               <ListItem
                 key={p}
                 secondaryAction={
@@ -312,13 +312,13 @@ function Profile() {
                     {todaySolved.map((p) => (
                       <TableRow>
                         <TableCell>{`${
-                          p.problemCode.slice(0, -4) === "basic"
+                          p.problemCode?.slice(0, -4) === "basic"
                             ? "기본"
                             : "심화"
-                        } ${p.problemCode.slice(
+                        } ${p.problemCode?.slice(
                           -4,
                           -2
-                        )}회 ${p.problemCode.slice(-2)}번`}</TableCell>
+                        )}회 ${p.problemCode?.slice(-2)}번`}</TableCell>
                         <TableCell>{p.timetaken / 1000}초</TableCell>
                         <TableCell>{p.isCorrect ? "O" : "X"}</TableCell>
                       </TableRow>

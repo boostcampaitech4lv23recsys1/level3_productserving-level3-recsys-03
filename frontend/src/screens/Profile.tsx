@@ -76,7 +76,7 @@ function Profile() {
 
   useEffect(() => {
     getJjimList();
-  }, [jjimArray]);
+  }, []);
 
   const getProfile = async () => {
     const profile = await getDoc(doc(db, "users", String(userUID)));
@@ -212,7 +212,7 @@ function Profile() {
                       await updateDoc(doc(db, "users", String(userUID)), {
                         jjimlist: arrayRemove(p),
                       });
-                      setJjimArray([...jjimArray]?.filter((x) => x !== p));
+                      getJjimList()
                     }}
                   >
                     <DeleteIcon />

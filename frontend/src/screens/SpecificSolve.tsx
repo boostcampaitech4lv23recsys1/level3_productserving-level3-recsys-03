@@ -42,7 +42,7 @@ const styles = {
   borderRadius: "0.25rem",
 };
 function SpecificSolve(props: { pArray: Array<string> }) {
-  const pArray = props.pArray;
+  const [pArray, setPArray] = useState<Array<string>>(props.pArray);
   const windowHeight = window.innerHeight;
   const windowWidth = window.innerWidth;
   const canvasRef = useRef<ReactSketchCanvasRef>(null);
@@ -55,6 +55,7 @@ function SpecificSolve(props: { pArray: Array<string> }) {
   const [selected, setSelected] = useState(0);
   const [currentNum, setCurrentNum] = useState(0);
   const [answer, setAnswer] = useState(0);
+  const [similar, setSimilar] = useState<Array<string>>([])
   const [solved, setSolved] = useState(false);
 
   const [jjimArray, setJjimArray] = useState<Array<string>>([]);
@@ -69,6 +70,7 @@ function SpecificSolve(props: { pArray: Array<string> }) {
     );
     setAnswer(newAnswer.data()?.answer);
     setLink(newAnswer.data()?.commentLink);
+    setSimilar(newAnswer.data()?.similar)
   };
   const diffOfExam = pArray[currentNum]?.slice(0, -4);
   const numArray = diffOfExam === "basic" ? [1, 2, 3, 4] : [1, 2, 3, 4, 5];
@@ -284,8 +286,8 @@ function SpecificSolve(props: { pArray: Array<string> }) {
         >
           <DialogTitle>
             {`${
-              pArray[currentNum].slice(0, -4) === "basic" ? "기본" : "심화"
-            } ${pArray[currentNum].slice(-4, -2)}회 ${pArray[currentNum].slice(
+              pArray[currentNum]?.slice(0, -4) === "basic" ? "기본" : "심화"
+            } ${pArray[currentNum]?.slice(-4, -2)}회 ${pArray[currentNum]?.slice(
               -2
             )}번 테스트 결과 : ${
               answer === selected ? "정답입니다" : "틀렸습니다"
@@ -301,6 +303,7 @@ function SpecificSolve(props: { pArray: Array<string> }) {
                     <TableCell>정답</TableCell>
                     <TableCell>해설</TableCell>
                     <TableCell>찜하기</TableCell>
+                    <TableCell>유사 문제 풀기</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -338,6 +341,16 @@ function SpecificSolve(props: { pArray: Array<string> }) {
                         )}
                       </Button>
                     </TableCell>
+                    <TableCell>
+                      <Button onClick={() => {
+                        setPArray(similar)
+                        setCurrentNum(0)
+                        setSolved(false)
+                      }}>
+                        5문항 풀기
+                      </Button>
+                    </TableCell>
+
                   </TableRow>
                 </TableBody>
               </Table>

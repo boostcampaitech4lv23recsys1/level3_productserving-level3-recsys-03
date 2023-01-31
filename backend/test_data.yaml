@@ -1,0 +1,16 @@
+
+USER_ID_FIELD: user_id
+ITEM_ID_FIELD: item_id
+RATING_FIELD: rating
+TIME_FIELD: timestamp
+
+load_col:
+    inter: [user_id, item_id, rating, timestamp]
+
+user_inter_num_interval: "[0,inf)"
+item_inter_num_interval: "[0,inf)"
+val_interval:
+    rating: "[0,1]"
+    timestamp: "[1672892980000, inf)"
+
+neg_sampling: ~

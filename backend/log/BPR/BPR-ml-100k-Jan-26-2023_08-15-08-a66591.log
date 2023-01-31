@@ -1,0 +1,144 @@
+Thu 26 Jan 2023 08:15:08 INFO  ['test_run.py', '--dataset=ml-100k', '--model=BPR', '--epochs=5']
+Thu 26 Jan 2023 08:15:08 INFO  
+General Hyper Parameters:
+gpu_id = 0
+use_gpu = True
+seed = 2020
+state = INFO
+reproducibility = True
+data_path = /opt/conda/envs/fastapi/lib/python3.8/site-packages/recbole/config/../dataset_example/ml-100k
+checkpoint_dir = saved
+show_progress = True
+save_dataset = False
+dataset_save_path = None
+save_dataloaders = False
+dataloaders_save_path = None
+log_wandb = False
+
+Training Hyper Parameters:
+epochs = 5
+train_batch_size = 2048
+learner = adam
+learning_rate = 0.001
+train_neg_sample_args = {'distribution': 'uniform', 'sample_num': 1, 'alpha': 1.0, 'dynamic': False, 'candidate_num': 0}
+eval_step = 1
+stopping_step = 10
+clip_grad_norm = None
+weight_decay = 0.0
+loss_decimal_place = 4
+
+Evaluation Hyper Parameters:
+eval_args = {'split': {'RS': [0.8, 0.1, 0.1]}, 'group_by': 'user', 'order': 'RO', 'mode': 'full'}
+repeatable = False
+metrics = ['Recall', 'MRR', 'NDCG', 'Hit', 'Precision']
+topk = [10]
+valid_metric = MRR@10
+valid_metric_bigger = True
+eval_batch_size = 4096
+metric_decimal_place = 4
+
+Dataset Hyper Parameters:
+field_separator = 	
+seq_separator =  
+USER_ID_FIELD = user_id
+ITEM_ID_FIELD = item_id
+RATING_FIELD = rating
+TIME_FIELD = timestamp
+seq_len = None
+LABEL_FIELD = label
+threshold = None
+NEG_PREFIX = neg_
+load_col = {'inter': ['user_id', 'item_id', 'rating', 'timestamp']}
+unload_col = None
+unused_col = None
+additional_feat_suffix = None
+rm_dup_inter = None
+val_interval = None
+filter_inter_by_user_or_item = True
+user_inter_num_interval = None
+item_inter_num_interval = None
+alias_of_user_id = None
+alias_of_item_id = None
+alias_of_entity_id = None
+alias_of_relation_id = None
+preload_weight = None
+normalize_field = None
+normalize_all = True
+ITEM_LIST_LENGTH_FIELD = item_length
+LIST_SUFFIX = _list
+MAX_ITEM_LIST_LENGTH = 50
+POSITION_FIELD = position_id
+HEAD_ENTITY_ID_FIELD = head_id
+TAIL_ENTITY_ID_FIELD = tail_id
+RELATION_ID_FIELD = relation_id
+ENTITY_ID_FIELD = entity_id
+kg_reverse_r = False
+entity_kg_num_interval = None
+relation_kg_num_interval = None
+benchmark_filename = None
+
+Other Hyper Parameters: 
+worker = 0
+wandb_project = recbole
+shuffle = True
+require_pow = False
+enable_amp = False
+enable_scaler = False
+transform = None
+embedding_size = 64
+numerical_features = []
+discretization = None
+MODEL_TYPE = ModelType.GENERAL
+MODEL_INPUT_TYPE = InputType.PAIRWISE
+eval_type = EvaluatorType.RANKING
+single_spec = True
+local_rank = 0
+device = cuda
+eval_neg_sample_args = {'distribution': 'uniform', 'sample_num': 'none'}
+
+
+Thu 26 Jan 2023 08:15:09 INFO  ml-100k
+The number of users: 944
+Average actions of users: 106.04453870625663
+The number of items: 1683
+Average actions of items: 59.45303210463734
+The number of inters: 100000
+The sparsity of the dataset: 93.70575143257098%
+Remain Fields: ['user_id', 'item_id', 'rating', 'timestamp']
+Thu 26 Jan 2023 08:15:09 INFO  [Training]: train_batch_size = [2048] train_neg_sample_args: [{'distribution': 'uniform', 'sample_num': 1, 'alpha': 1.0, 'dynamic': False, 'candidate_num': 0}]
+Thu 26 Jan 2023 08:15:09 INFO  [Evaluation]: eval_batch_size = [4096] eval_args: [{'split': {'RS': [0.8, 0.1, 0.1]}, 'group_by': 'user', 'order': 'RO', 'mode': 'full'}]
+Thu 26 Jan 2023 08:15:11 INFO  BPR(
+  (user_embedding): Embedding(944, 64)
+  (item_embedding): Embedding(1683, 64)
+  (loss): BPRLoss()
+)
+Trainable parameters: 168128
+Thu 26 Jan 2023 08:15:11 INFO  FLOPs: 128.0
+Thu 26 Jan 2023 08:15:11 INFO  epoch 0 training [time: 0.20s, train loss: 27.7240]
+Thu 26 Jan 2023 08:15:12 INFO  epoch 0 evaluating [time: 1.24s, valid_score: 0.025700]
+Thu 26 Jan 2023 08:15:12 INFO  valid result: 
+recall@10 : 0.0085    mrr@10 : 0.0257    ndcg@10 : 0.0108    hit@10 : 0.0838    precision@10 : 0.0091
+Thu 26 Jan 2023 08:15:12 INFO  Saving current: saved/BPR-Jan-26-2023_08-15-11.pth
+Thu 26 Jan 2023 08:15:13 INFO  epoch 1 training [time: 0.19s, train loss: 27.6345]
+Thu 26 Jan 2023 08:15:13 INFO  epoch 1 evaluating [time: 0.55s, valid_score: 0.055600]
+Thu 26 Jan 2023 08:15:13 INFO  valid result: 
+recall@10 : 0.0164    mrr@10 : 0.0556    ndcg@10 : 0.0217    hit@10 : 0.1485    precision@10 : 0.0178
+Thu 26 Jan 2023 08:15:13 INFO  Saving current: saved/BPR-Jan-26-2023_08-15-11.pth
+Thu 26 Jan 2023 08:15:13 INFO  epoch 2 training [time: 0.19s, train loss: 27.3318]
+Thu 26 Jan 2023 08:15:14 INFO  epoch 2 evaluating [time: 0.55s, valid_score: 0.160300]
+Thu 26 Jan 2023 08:15:14 INFO  valid result: 
+recall@10 : 0.0523    mrr@10 : 0.1603    ndcg@10 : 0.0738    hit@10 : 0.3627    precision@10 : 0.0606
+Thu 26 Jan 2023 08:15:14 INFO  Saving current: saved/BPR-Jan-26-2023_08-15-11.pth
+Thu 26 Jan 2023 08:15:14 INFO  epoch 3 training [time: 0.19s, train loss: 26.0469]
+Thu 26 Jan 2023 08:15:15 INFO  epoch 3 evaluating [time: 0.56s, valid_score: 0.228500]
+Thu 26 Jan 2023 08:15:15 INFO  valid result: 
+recall@10 : 0.0904    mrr@10 : 0.2285    ndcg@10 : 0.1155    hit@10 : 0.4963    precision@10 : 0.0908
+Thu 26 Jan 2023 08:15:15 INFO  Saving current: saved/BPR-Jan-26-2023_08-15-11.pth
+Thu 26 Jan 2023 08:15:15 INFO  epoch 4 training [time: 0.18s, train loss: 22.7424]
+Thu 26 Jan 2023 08:15:15 INFO  epoch 4 evaluating [time: 0.55s, valid_score: 0.252500]
+Thu 26 Jan 2023 08:15:15 INFO  valid result: 
+recall@10 : 0.1017    mrr@10 : 0.2525    ndcg@10 : 0.129    hit@10 : 0.527    precision@10 : 0.0978
+Thu 26 Jan 2023 08:15:15 INFO  Saving current: saved/BPR-Jan-26-2023_08-15-11.pth
+Thu 26 Jan 2023 08:15:15 INFO  Loading model structure and parameters from saved/BPR-Jan-26-2023_08-15-11.pth
+Thu 26 Jan 2023 08:15:16 INFO  best valid : OrderedDict([('recall@10', 0.1017), ('mrr@10', 0.2525), ('ndcg@10', 0.129), ('hit@10', 0.527), ('precision@10', 0.0978)])
+Thu 26 Jan 2023 08:15:16 INFO  test result: OrderedDict([('recall@10', 0.1154), ('mrr@10', 0.3066), ('ndcg@10', 0.1564), ('hit@10', 0.5525), ('precision@10', 0.1139)])

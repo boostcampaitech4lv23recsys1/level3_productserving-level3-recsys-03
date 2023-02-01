@@ -171,7 +171,7 @@ function FullTestSolve() {
           { merge: true }
         );
         await setDoc(
-          doc(db, "logs", "solved"),
+          doc(db, "logs2", "solved"),
           {
             solved: arrayUnion({
               userUID: userUID ? userUID : undefined,

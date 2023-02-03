@@ -201,39 +201,41 @@ function Profile() {
         </ListItemButton>
         <Collapse in={jjimOpen} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            {jjimArray?.filter((x)=>x).map((p) => (
-              <ListItem
-                key={p}
-                secondaryAction={
-                  <IconButton
-                    edge="end"
-                    aria-label="delete"
-                    onClick={async () => {
-                      await updateDoc(doc(db, "users", String(userUID)), {
-                        jjimlist: arrayRemove(p),
-                      });
-                      getJjimList()
+            {jjimArray
+              ?.filter((x) => x)
+              .map((p) => (
+                <ListItem
+                  key={p}
+                  secondaryAction={
+                    <IconButton
+                      edge="end"
+                      aria-label="delete"
+                      onClick={async () => {
+                        await updateDoc(doc(db, "users", String(userUID)), {
+                          jjimlist: arrayRemove(p),
+                        });
+                        getJjimList();
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  }
+                >
+                  <ListItemButton
+                    sx={{ pl: 4 }}
+                    onClick={() => {
+                      setPArray([p]);
+                      setIsDialogOpen(true);
                     }}
                   >
-                    <DeleteIcon />
-                  </IconButton>
-                }
-              >
-                <ListItemButton
-                  sx={{ pl: 4 }}
-                  onClick={() => {
-                    setPArray([p]);
-                    setIsDialogOpen(true);
-                  }}
-                >
-                  <ListItemText
-                    primary={`${
-                      p.slice(0, -4) === "basic" ? "기본" : "심화"
-                    } ${p.slice(-4, -2)}회 ${p.slice(-2)}번`}
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))}
+                    <ListItemText
+                      primary={`${
+                        p.slice(0, -4) === "basic" ? "기본" : "심화"
+                      } ${p.slice(-4, -2)}회 ${p.slice(-2)}번`}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              ))}
           </List>
         </Collapse>
       </List>

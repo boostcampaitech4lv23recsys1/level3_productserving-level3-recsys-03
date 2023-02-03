@@ -1,5 +1,5 @@
 import { Button, Dialog } from "@mui/material";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, Index } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { isDialogOpenAtom, userUIDAtom } from "../atoms";
@@ -7,65 +7,66 @@ import { db } from "../fbase";
 import SpecificSolve from "./SpecificSolve";
 
 import LoadingIcons from "react-loading-icons";
+import RecSolve from "./RecSolve";
 
 function AI() {
   const userUID = useRecoilValue(userUIDAtom);
   const [recProblem, setRecProblem] = useState<Array<string>>([]);
-  const [incorrectArray, setIncorrectArray] = useState<
-    Array<{
-      problemCode: string;
-      selected: number;
-      timetaken: number;
-      reviewed: boolean;
-      cause: string;
-    }>
-  >([]);
+  const [solvedArray, setSolvedArray] = useState<Array<string>>([]);
   const isDialogOpen = useRecoilValue(isDialogOpenAtom);
   const setIsDialogOpen = useSetRecoilState(isDialogOpenAtom);
 
-  const [isLoading, setIsLoading] = useState<Boolean>(false);
+  const [isLoading, setIsLoading] = useState<Boolean>(true);
+  const [model, setModel] = useState<string>("");
 
   useEffect(() => {
-    getProfile();
+    fetch(
+      `https://us-central1-gildong-k-history.cloudfunctions.net/getRecentSolved/${userUID}`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      }
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setSolvedArray(data);
+      });
   }, []);
 
   useEffect(() => {
-    if (incorrectArray.length > 5) {
-      getAnswer();
+    if (recProblem.length===10 && !isDialogOpen) {
+      setIsLoading(true);
+      setIsDialogOpen(true);
     }
-  }, [incorrectArray]);
+  }, [recProblem]);
 
-  const getProfile = async () => {
-    const profile = await getDoc(doc(db, "users", String(userUID)));
-    if (profile.exists()) {
-      const solved = profile.data().solved;
-      const incorrect = solved
-        .slice(-100)
-        .filter((x: { isCorrect: boolean }) => !x.isCorrect);
-      setIncorrectArray(incorrect);
-    }
-  };
-
-  const getAnswer = async () => {
-    const randNumSet = new Set();
-    // 수정 필요
-    const incorrectArrayLength = incorrectArray.length;
-    console.log(incorrectArrayLength);
-    while (randNumSet.size < 5) {
-      randNumSet.add(Math.floor(Math.random() * incorrectArrayLength));
-    }
-    const randNumArr: Array<any> = Array.from(randNumSet);
-    console.log(randNumArr);
-    const newRecProblem = [];
-    while (randNumArr.length > 0) {
-      const newAnswer = await getDoc(
-        doc(db, "problems", incorrectArray[randNumArr.pop()]?.problemCode)
+  const getRecProblem = (diff: string) => {
+    setIsLoading(false);
+    fetch(
+      `https://us-central1-gildong-k-history.cloudfunctions.net/getRecProblems/${userUID}`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      }
+    )
+      .then((res) => res.json())
+      .then(
+        (data: {
+          [key: string]: { recommend: Array<string>; random: Array<string> };
+        }) => {
+          setModel(Object.keys(data)[0]);
+          const newRecProblem = [];
+          for (let i = 0; i < 5; i++) {
+            newRecProblem.push(data[Object.keys(data)[0]].recommend[i]);
+            newRecProblem.push(data[Object.keys(data)[0]].random[i]);
+          }
+          setRecProblem(newRecProblem);
+        }
       );
-      const newProblem = newAnswer.data()?.similar;
-      newRecProblem.push(newProblem[Math.floor(Math.random() * 5)]);
-    }
-    setRecProblem(newRecProblem);
-    setIsLoading(true);
   };
 
   return (
@@ -80,22 +81,40 @@ function AI() {
           />
         </div>
         <div>
-          <p></p>
           {isLoading ? (
-            <Button
-              style={{
-                width: "120px",
-                height: "80px",
-                backgroundColor: "#D5BCA2",
-                color: "#37190F",
-              }}
-              variant="contained"
-              onClick={() => {
-                setIsDialogOpen(true);
-              }}
-            >
-              AI 추천 문제
-            </Button>
+            <div style={{ display: "inline-grid" }}>
+              {solvedArray.length > 29 ? (
+                <Button
+                  style={{
+                    width: "120px",
+                    height: "80px",
+                    backgroundColor: "#D5BCA2",
+                    color: "#37190F",
+                    marginTop: "5px",
+                  }}
+                  variant="contained"
+                  onClick={() => {
+                    getRecProblem("advanced");
+                  }}
+                >
+                  심화 추천 문제
+                </Button>
+              ) : (
+                <div
+                  style={{
+                    width: "120px",
+                    height: "80px",
+                    backgroundColor: "gray",
+                    color: "white",
+                    marginTop: "5px",
+                    textAlign: "center",
+                    borderRadius: "5px",
+                  }}
+                >
+                  추천을 위한 기본 문제 풀이가 부족합니다
+                </div>
+              )}
+            </div>
           ) : (
             <LoadingIcons.Grid fill="#D5BCA2" />
           )}
@@ -106,7 +125,7 @@ function AI() {
         open={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
       >
-        <SpecificSolve pArray={recProblem} />
+        <RecSolve pArray={recProblem} model={model} />
       </Dialog>
     </>
   );

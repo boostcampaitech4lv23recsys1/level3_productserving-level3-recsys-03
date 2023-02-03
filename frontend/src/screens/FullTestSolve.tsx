@@ -171,7 +171,7 @@ function FullTestSolve() {
           { merge: true }
         );
         await setDoc(
-          doc(db, "logs", "solved"),
+          doc(db, "logs2", "solved"),
           {
             solved: arrayUnion({
               userUID: userUID ? userUID : undefined,
@@ -265,12 +265,6 @@ function FullTestSolve() {
           backgroundColor: "white",
           width: "95%",
           height: "75%",
-          // backgroundImage: `url(https://storage.cloud.google.com/gildong-k-history/${
-          //   diffOfExam + '/' + roundOfExam +'/' + (qNum-1).toString()
-          // }.png)`,
-          // backgroundRepeat: 'no-repeat',
-          // backgroundSize: 'contain',
-          // backgroundPosition:'center',
         }}
       >
         <ReactSketchCanvas

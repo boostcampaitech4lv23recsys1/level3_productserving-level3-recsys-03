@@ -9,7 +9,7 @@ import SpecificSolve from "./SpecificSolve";
 import LoadingIcons from "react-loading-icons";
 import RecSolve from "./RecSolve";
 
-function AI() {
+function About() {
   const userUID = useRecoilValue(userUIDAtom);
   const [recProblem, setRecProblem] = useState<Array<string>>([])
   const [solvedArray, setSolvedArray] = useState<Array<string>>([]);
@@ -20,7 +20,7 @@ function AI() {
   const [model, setModel] = useState<string>('')
 
   useEffect(() => {
-    fetch(`http://27.96.130.82:30001/db/${userUID}/advanced`, {
+    fetch(`https://us-central1-gildong-k-history.cloudfunctions.net/getRecentSolved`, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -34,7 +34,7 @@ function AI() {
 
   const getRecProblem = (diff: string) => {
     setIsLoading(false)
-    fetch(`http://27.96.130.82:30001/model/${diff}/${userUID}`, {
+    fetch(`https://us-central1-gildong-k-history.cloudfunctions.net/getRecProblems`, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -117,4 +117,4 @@ function AI() {
   );
 }
 
-export default AI;
+export default About;

@@ -273,7 +273,6 @@ function SpecificSolve(props: { pArray: Array<string> }) {
             setSolved(false);
             const newCurrentNum = currentNum + 1;
             if (newCurrentNum < pArray.length) {
-              console.log(pArray, newCurrentNum);
               setCurrentNum(newCurrentNum);
               setStartTime(new Date().getTime());
               setSelected(0);

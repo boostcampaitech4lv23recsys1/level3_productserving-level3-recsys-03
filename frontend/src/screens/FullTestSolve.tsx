@@ -265,12 +265,6 @@ function FullTestSolve() {
           backgroundColor: "white",
           width: "95%",
           height: "75%",
-          // backgroundImage: `url(https://storage.cloud.google.com/gildong-k-history/${
-          //   diffOfExam + '/' + roundOfExam +'/' + (qNum-1).toString()
-          // }.png)`,
-          // backgroundRepeat: 'no-repeat',
-          // backgroundSize: 'contain',
-          // backgroundPosition:'center',
         }}
       >
         <ReactSketchCanvas

@@ -13,7 +13,14 @@ import {
   userUIDAtom,
   diffOfExamAtom,
 } from "../atoms";
-import { arrayUnion, doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  arrayRemove,
+  arrayUnion,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../fbase";
 import {
   Dialog,
@@ -29,6 +36,7 @@ import {
   TableRow,
 } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
 
 const styles = {
   border: "0.0625rem solid #9c9c9c",
@@ -53,10 +61,13 @@ function FullTestSolve() {
   const [restTime, setRestTime] = useState("");
   const [isEraseMode, setIsEraseMode] = useState(false);
   const [testInfo, setTestInfo] = useState<
-    Array<{ answer: Number; score: Number }>
+    Array<{ answer: Number; score: Number; commentLink: URL }>
   >([]);
   const [isFinish, setIsFinish] = useState(false);
   const numArray = diffOfExam === "basic" ? [1, 2, 3, 4] : [1, 2, 3, 4, 5];
+
+  const [jjimArray, setJjimArray] = useState<Array<string>>([]);
+
   useEffect(() => {
     const id = setInterval(() => {
       const newCurrentTime = new Date().getTime();
@@ -83,6 +94,17 @@ function FullTestSolve() {
   useEffect(() => {
     handleSolvingChange();
   }, [isFinish]);
+
+  useEffect(() => {
+    getJjimList();
+  }, []);
+
+  const getJjimList = async () => {
+    const profile = await getDoc(doc(db, "users", String(userUID)));
+    if (profile.exists()) {
+      setJjimArray(profile.data().jjimlist);
+    }
+  };
 
   const handleClickNextButton = () => {
     const newTimeArray: any = [...timeArray];
@@ -149,7 +171,7 @@ function FullTestSolve() {
           { merge: true }
         );
         await setDoc(
-          doc(db, "logs", "solved"),
+          doc(db, "logs2", "solved"),
           {
             solved: arrayUnion({
               userUID: userUID ? userUID : undefined,
@@ -193,6 +215,7 @@ function FullTestSolve() {
         qArray.push({
           answer: docSnap.data().answer,
           score: docSnap.data().score,
+          commentLink: docSnap.data().commentLink,
         });
       }
     }
@@ -207,6 +230,24 @@ function FullTestSolve() {
       }
     });
     return totalScore;
+  };
+
+  const deleteJjimList = async (p: string) => {
+    await updateDoc(doc(db, "users", String(userUID)), {
+      jjimlist: arrayRemove(p),
+    });
+    getJjimList();
+  };
+
+  const addJjimList = async (p: string) => {
+    await setDoc(
+      doc(db, "users", String(userUID)),
+      {
+        jjimlist: arrayUnion(p),
+      },
+      { merge: true }
+    );
+    getJjimList();
   };
 
   return (
@@ -224,12 +265,6 @@ function FullTestSolve() {
           backgroundColor: "white",
           width: "95%",
           height: "75%",
-          // backgroundImage: `url(https://storage.cloud.google.com/gildong-k-history/${
-          //   diffOfExam + '/' + roundOfExam +'/' + (qNum-1).toString()
-          // }.png)`,
-          // backgroundRepeat: 'no-repeat',
-          // backgroundSize: 'contain',
-          // backgroundPosition:'center',
         }}
       >
         <ReactSketchCanvas
@@ -344,7 +379,9 @@ function FullTestSolve() {
           aria-describedby="alert-dialog-description"
         >
           <DialogTitle>
-            {`${examCode} 테스트 결과 : ${totalScore()}점`}
+            {`${
+              examCode.slice(0, -4) === "basic" ? "기본" : "심화"
+            } ${examCode.slice(-4)} 테스트 결과 : ${totalScore()}점`}
           </DialogTitle>
           <DialogContent>
             <TableContainer component={Paper}>
@@ -354,6 +391,7 @@ function FullTestSolve() {
                     <TableCell>문항 번호</TableCell>
                     <TableCell>제출 답안</TableCell>
                     <TableCell>정답</TableCell>
+                    <TableCell>해설</TableCell>
                     <TableCell>배점</TableCell>
                     <TableCell>찜하기</TableCell>
                   </TableRow>
@@ -370,22 +408,35 @@ function FullTestSolve() {
                       <TableCell>{`${i + 1}번`}</TableCell>
                       <TableCell>{answerArray[i + 1]}</TableCell>
                       <TableCell>{String(q.answer)}</TableCell>
+                      <TableCell
+                        onClick={() => {
+                          window.open(q.commentLink, "_blank");
+                        }}
+                      >
+                        link
+                      </TableCell>
                       <TableCell>{String(q.score)}</TableCell>
                       <TableCell>
                         <Button
-                          onClick={async () => {
-                            await setDoc(
-                              doc(db, "users", String(userUID)),
-                              {
-                                jjimlist: arrayUnion(
-                                  Number(String(examCode) + String(i + 1))
-                                ),
-                              },
-                              { merge: true }
-                            );
+                          onClick={() => {
+                            const p =
+                              diffOfExam +
+                              roundOfExam +
+                              (i + 1).toString().padStart(2, "0");
+                            jjimArray?.indexOf(p) === -1
+                              ? addJjimList(p)
+                              : deleteJjimList(p);
                           }}
                         >
-                          <StarIcon />
+                          {jjimArray?.indexOf(
+                            diffOfExam +
+                              roundOfExam +
+                              (i + 1).toString().padStart(2, "0")
+                          ) === -1 ? (
+                            <StarBorderIcon />
+                          ) : (
+                            <StarIcon />
+                          )}
                         </Button>
                       </TableCell>
                     </TableRow>

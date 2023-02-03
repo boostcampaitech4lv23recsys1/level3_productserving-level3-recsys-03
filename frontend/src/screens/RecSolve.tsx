@@ -41,8 +41,9 @@ const styles = {
   border: "0.0625rem solid #9c9c9c",
   borderRadius: "0.25rem",
 };
-function SpecificSolve(props: { pArray: Array<string> }) {
+function RecSolve(props: { pArray: Array<string>; model: string }) {
   const [pArray, setPArray] = useState<Array<string>>(props.pArray);
+  const [model, setModel] = useState<string>(props.model);
   const windowHeight = window.innerHeight;
   const windowWidth = window.innerWidth;
   const canvasRef = useRef<ReactSketchCanvasRef>(null);
@@ -57,7 +58,9 @@ function SpecificSolve(props: { pArray: Array<string> }) {
   const [answer, setAnswer] = useState(0);
   const [similar, setSimilar] = useState<Array<string>>([]);
   const [solved, setSolved] = useState(false);
-
+  const [recHash, setRecHash] = useState<string>(
+    Math.random().toString(36).slice(2)
+  );
   const [jjimArray, setJjimArray] = useState<Array<string>>([]);
   const [link, setLink] = useState<URL>();
 
@@ -113,6 +116,24 @@ function SpecificSolve(props: { pArray: Array<string> }) {
           isCorrect: answer === selected,
         }),
       });
+      await setDoc(
+        doc(db, "rec", "solved"),
+        {
+          solved: arrayUnion({
+            userUID: userUID ? userUID : undefined,
+            problemCode: pArray[currentNum],
+            selected: selected,
+            timetaken: endTime - startTime,
+            solvedAt: endTime,
+            testMode: isFullTest,
+            isCorrect: answer === selected,
+            model: model,
+            isRec: currentNum % 2 === 0,
+            recHash: recHash,
+          }),
+        },
+        { merge: true }
+      );
       if (answer !== selected) {
         await updateDoc(doc(db, "users", String(userUID)), {
           incorrect: arrayUnion({
@@ -361,4 +382,4 @@ function SpecificSolve(props: { pArray: Array<string> }) {
     </div>
   );
 }
-export default SpecificSolve;
+export default RecSolve;

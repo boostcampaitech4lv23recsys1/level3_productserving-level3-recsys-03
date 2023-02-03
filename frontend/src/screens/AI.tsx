@@ -9,49 +9,64 @@ import SpecificSolve from "./SpecificSolve";
 import LoadingIcons from "react-loading-icons";
 import RecSolve from "./RecSolve";
 
-function About() {
+function AI() {
   const userUID = useRecoilValue(userUIDAtom);
-  const [recProblem, setRecProblem] = useState<Array<string>>([])
+  const [recProblem, setRecProblem] = useState<Array<string>>([]);
   const [solvedArray, setSolvedArray] = useState<Array<string>>([]);
   const isDialogOpen = useRecoilValue(isDialogOpenAtom);
   const setIsDialogOpen = useSetRecoilState(isDialogOpenAtom);
 
   const [isLoading, setIsLoading] = useState<Boolean>(true);
-  const [model, setModel] = useState<string>('')
+  const [model, setModel] = useState<string>("");
 
   useEffect(() => {
-    fetch(`https://us-central1-gildong-k-history.cloudfunctions.net/getRecentSolved`, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    })
+    fetch(
+      `https://us-central1-gildong-k-history.cloudfunctions.net/getRecentSolved/${userUID}`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      }
+    )
       .then((res) => res.json())
       .then((data) => {
-        console.log(data)
-        setSolvedArray(data)});
+        setSolvedArray(data);
+      });
   }, []);
 
+  useEffect(() => {
+    if (recProblem.length===10 && !isDialogOpen) {
+      setIsLoading(true);
+      setIsDialogOpen(true);
+    }
+  }, [recProblem]);
+
   const getRecProblem = (diff: string) => {
-    setIsLoading(false)
-    fetch(`https://us-central1-gildong-k-history.cloudfunctions.net/getRecProblems`, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    })
+    setIsLoading(false);
+    fetch(
+      `https://us-central1-gildong-k-history.cloudfunctions.net/getRecProblems/${userUID}`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      }
+    )
       .then((res) => res.json())
-      .then((data:{[key:string]:{recommend:Array<string>, random: Array<string>}}) => {
-        setModel(Object.keys(data)[0])
-        const newRecProblem = []
-        for(let i = 0; i<5; i++){
-          newRecProblem.push(data[Object.keys(data)[0]].recommend[i])
-          newRecProblem.push(data[Object.keys(data)[0]].random[i])
+      .then(
+        (data: {
+          [key: string]: { recommend: Array<string>; random: Array<string> };
+        }) => {
+          setModel(Object.keys(data)[0]);
+          const newRecProblem = [];
+          for (let i = 0; i < 5; i++) {
+            newRecProblem.push(data[Object.keys(data)[0]].recommend[i]);
+            newRecProblem.push(data[Object.keys(data)[0]].random[i]);
+          }
+          setRecProblem(newRecProblem);
         }
-        setRecProblem(newRecProblem)
-        setIsLoading(true)
-        setIsDialogOpen(true)
-      });
+      );
   };
 
   return (
@@ -68,8 +83,7 @@ function About() {
         <div>
           {isLoading ? (
             <div style={{ display: "inline-grid" }}>
-              {solvedArray.length >
-              29 ? (
+              {solvedArray.length > 29 ? (
                 <Button
                   style={{
                     width: "120px",
@@ -117,4 +131,4 @@ function About() {
   );
 }
 
-export default About;
+export default AI;

@@ -1,2 +1,5 @@
 __pycache__/
 key/
+log/
+log_tensorboard/
+saved/

@@ -5,15 +5,18 @@ from uuid import UUID, uuid4
 from typing import List, Union, Optional, Dict, Any
 
 from datetime import datetime
-from app.firebase_db import load_database, get_user_solved, get_dataframe, get_full_problemCode, get_tfidf_dataset
+from app.firebase_db import load_database, get_user_solved, get_user_solved_seq, get_dataframe, get_full_problemCode, get_tfidf_dataset
 from collections import defaultdict
 
 import requests
 import json
 import random
 from app.model import load_data, tfidf_recommender
-from my_inference import inference_main
+from my_inference import inference_main, inference_seq
 from starlette.middleware.cors import CORSMiddleware
+
+import os
+
 
 origins = [
     "*"
@@ -69,9 +72,11 @@ async def get_solved(user_id: str,level:str):
 
 @app.get("/model/{level}/{userUID}", description="난이도와 유저를 입력하면 추천 리스트를 가져옵니다.")
 async def get_model_output(level:str,userUID:str):
-    model_lst = ["tfidf",'ease']
-    model_name = random.sample(model_lst,1)[0]
+    random.seed() # 랜덤시드를 풀어줌으로서 고정되는 문제 해결
+    model_lst = ['tfidf', 'ease', 'sasrec']
+    model_name = random.sample(model_lst, 1)[0]
     # solved_lst = get_user_solved(db,userUID,False)
+
 
     if level == 'basic': 
         solved_lst = get_tfidf_dataset(db, userUID, level)   
@@ -110,7 +115,7 @@ async def get_model_output(level:str,userUID:str):
             return rec_dict
         
         elif model_name == "ease":
-            model_path = '/opt/ml/backend/saved/EASE-Feb-02-2023_10-00-01.pth'
+            model_path = os.getcwd()+'/saved/EASE-Feb-03-2023_05-57-16.pth'
             user_problem_lst = get_user_solved(db, userUID, level, False)
             
             result = inference_main(userUID, user_problem_lst, model_path)
@@ -119,8 +124,20 @@ async def get_model_output(level:str,userUID:str):
             rec_dict[model_name]['recommend'] = result
             rec_dict[model_name]['random'] = random.sample(advanced_lst,10-len(result))
             return rec_dict
-        else:
-            pass
+        
+        elif model_name == "sasrec":
+            try:
+                model_path = os.getcwd()+'/saved/SASRec-Feb-03-2023_09-21-56.pth'
+                user_df = get_user_solved_seq(db, userUID, level)
+
+                result = inference_seq(userUID, user_df, model_path)
+
+                rec_dict = {model_name:{}}
+                rec_dict[model_name]['recommend'] = result
+                rec_dict[model_name]['random'] = random.sample(advanced_lst,10-len(result))
+                return rec_dict
+            except:
+                return {f"{userUID}의 데이터가 충분하지 않습니다. sasrec error."}
 
     
 

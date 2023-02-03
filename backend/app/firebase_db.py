@@ -3,10 +3,13 @@ import requests
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
+import os
 
 def load_database():
-
-    private_ket = '/opt/ml/backend/key/gildong-k-history-firebase-adminsdk-i7q1c-f7652da7b0.json'
+    print('getcwd:', os.getcwd())
+    KEY_PATH = os.getcwd()+'/key/'
+    private_ket = KEY_PATH + os.listdir(KEY_PATH)[0]
+    print(private_ket)
     cred = credentials.Certificate(private_ket)
     firebase_admin.initialize_app(cred)
     db = firestore.client()
@@ -49,6 +52,34 @@ def get_user_solved(db, user_id, level, full = True):
     else: 
         return list(sample_df.problemCode[-100:].values)
         # return {'problemCode' : list(sample_df.problemCode[-100:].values), "isCorrect" : list(sample_df.isCorrect[-100:].values)}
+
+## sequence data 
+def get_user_solved_seq(db, user_id, level):
+    df = get_dataframe(db)
+    df = df.loc[:, ['userUID', 'problemCode', 'isCorrect', 'solvedAt']]
+    df['isCorrect'] = df['isCorrect'].apply(int)
+    df = df.drop_duplicates(subset=['userUID','problemCode'],
+                                keep='last')
+    
+    sample_df = df[df.userUID == user_id] 
+
+    if level == "advanced": 
+        sample_df = sample_df[sample_df.problemCode.apply(lambda x: True if x[0] == 'a' else False)]
+    elif level == "basic":
+        sample_df = sample_df[sample_df.problemCode.apply(lambda x: True if x[0] == 'b' else False)]
+    else:
+        pass
+
+    sample_df = sample_df.rename(columns={'userUID':'user_id',
+                    'problemCode':'item_id',
+                    'isCorrect':'rating',
+                    'solvedAt':'timestamp'
+                    })
+    # 0 - 1 switching
+    sample_df['rating'] = sample_df['rating'].apply(lambda x: 0 if x==1 else 1)
+
+    return sample_df
+
 
 
 # def get_user_advanced_solved(db, user_id, iscorrect = True):

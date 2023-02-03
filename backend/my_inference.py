@@ -6,6 +6,7 @@ import json
 import numpy as np
 import pandas as pd
 import torch
+import os
 
 from app.firebase_db import load_database, get_user_solved
 
@@ -18,16 +19,21 @@ from logging import getLogger
 
 from recbole.data import (
     create_dataset,
-    data_preparation
+    data_preparation, 
+    get_dataloader
 )
 from recbole.utils import (
     init_logger,
     get_model,
     init_seed
 )
+from recbole.quick_start.quick_start import load_data_and_model
 
+from recbole.config import Config
 
-def load_data_and_model(model_file):
+from utils import predict_for_all_item
+
+def load_data_and_model_ih(model_file):
 
     checkpoint = torch.load(model_file)
     config = checkpoint["config"]
@@ -56,7 +62,7 @@ def inference_main(userUID, user_problem_lst, model_path):
     # args, _ = parser.parse_known_args()
     
     # model 불러오기
-    config, model, dataset = load_data_and_model(model_path)
+    config, model, dataset = load_data_and_model_ih(model_path)
 
     # device 설정
     device = config.final_config_dict['device']
@@ -89,19 +95,22 @@ def inference_main(userUID, user_problem_lst, model_path):
     batch_pred_list = list(map((lambda x : item_id2token[x]),batch_pred_list))
     return batch_pred_list     
 
-# db = load_database()
-# userUID = 'LH8ERBe1DpXavxtNNxKE0KIPyio2'
-# user_problem_lst = get_user_solved(db, userUID, 'advanced', False)
-# model_path = '/opt/ml/saved/EASE-Feb-02-2023_06-01-26.pth'
+def inference_seq(userUID, user_problem_df, model_path):
 
-# print(inference_main('LH8ERBe1DpXavxtNNxKE0KIPyio2', user_problem_lst, model_path))   
-    # now = datetime.now()
-    # result = dict()
-    # result[userUID] = batch_pred_list
-    # with open(f'/opt/ml/한국사작업/모델예축값/ease_{now.strftime("%Y-%m-%d %H:%M:%S")}.json','w',encoding="utf-8") as f:
-    #     json.dump(result,f,ensure_ascii=False)
+    config, model, dataset, _, _, test_data = load_data_and_model(model_path)
+    prediction = predict_for_all_item(
+                userUID, dataset, test_data, model, config
+            )
 
-    # print('inference done!')
+    batch_pred_list = dataset.id2token(
+                        dataset.iid_field, prediction.indices.data[0].cpu().numpy()
+                    )
+    
+    print('prediction:', prediction)
+    print('predicted_probs:', batch_pred_list)
+                    
+    return list(batch_pred_list)
+
 
     
     

@@ -1,72 +1,18 @@
 # run_inference.py 구현 예시
 
-import argparse
 import torch
-import json
 import numpy as np
-import pandas as pd
 import torch
-import os
-
-from app.firebase_db import load_database, get_user_solved
 
 from scipy.sparse import csr_matrix
-from datetime import datetime
-from collections import defaultdict
-
-from models.ease import EASE
-from logging import getLogger
-
-from recbole.data import (
-    create_dataset,
-    data_preparation, 
-    get_dataloader
-)
-from recbole.utils import (
-    init_logger,
-    get_model,
-    init_seed
-)
 from recbole.quick_start.quick_start import load_data_and_model
+from utils import predict_for_all_item, load_data_and_model_ih
 
-from recbole.config import Config
 
-from utils import predict_for_all_item
 
-def load_data_and_model_ih(model_file):
-
-    checkpoint = torch.load(model_file)
-    config = checkpoint["config"]
-    # config.final_config_dict['data_path'] = "/opt/ml/dataset/test_data"
-    # config.final_config_dict['dataset'] = "test123"
-    init_seed(config["seed"], config["reproducibility"])
-    init_logger(config)
-    logger = getLogger()
-    logger.info(config)
-
-    dataset = create_dataset(config)
-    logger.info(dataset)
-    train_data, valid_data, test_data = data_preparation(config, dataset)
-
-    init_seed(config["seed"], config["reproducibility"])
-    model = EASE(config, train_data.dataset).to(config["device"])
-    model.load_state_dict(checkpoint["state_dict"])
-    model.load_other_parameter(checkpoint.get("other_parameter"))
-
-    return config, model, dataset
-
-def inference_main(userUID, user_problem_lst, model_path):
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('--model_path', '-m', type=str, default=model_path, 
-    #                     help='name of models')  # '/opt/ml/saved/EASE-Feb-02-2023_06-01-26.pth'
-    # args, _ = parser.parse_known_args()
-    
+def inference_main(userUID, user_problem_lst, model_path,inp_model):
     # model 불러오기
-    config, model, dataset = load_data_and_model_ih(model_path)
-
-    # device 설정
-    device = config.final_config_dict['device']
-    
+    config, model, dataset = load_data_and_model_ih(model_path,inp_model)
     # user, item id -> token 변환 array
     item_id2token = dataset.field2id_token['item_id']
     token2item_id = dataset.field2token_id['item_id']
@@ -77,7 +23,7 @@ def inference_main(userUID, user_problem_lst, model_path):
         user_problem_arr[i] = 1
         
     model.eval()
-    interaction = csr_matrix(user_problem_arr) # 1 X 800 @ 800X800 = 1X800
+    interaction = csr_matrix(user_problem_arr) 
     r = model.userUID_predict(interaction)
     score = torch.from_numpy(r.flatten())
     
@@ -86,17 +32,17 @@ def inference_main(userUID, user_problem_lst, model_path):
     ind = np.argpartition(rating_pred, -5)[:, -5:]
     
     arr_ind = rating_pred[np.arange(len(rating_pred))[:, None], ind]
-
     arr_ind_argsort = np.argsort(arr_ind)[np.arange(len(rating_pred)), ::-1]
 
     batch_pred_list = list(ind[
         np.arange(len(rating_pred))[:, None], arr_ind_argsort
     ][0])
     batch_pred_list = list(map((lambda x : item_id2token[x]),batch_pred_list))
+
     return batch_pred_list     
 
-def inference_seq(userUID, user_problem_df, model_path):
 
+def inference_seq(userUID, user_problem_df, model_path):
     config, model, dataset, _, _, test_data = load_data_and_model(model_path)
     prediction = predict_for_all_item(
                 userUID, dataset, test_data, model, config

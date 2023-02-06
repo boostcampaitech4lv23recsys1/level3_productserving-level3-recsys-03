@@ -1,7 +1,16 @@
 import numpy as np
 import torch
-from recbole.data.interaction import Interaction
 
+from logging import getLogger
+from recbole.data.interaction import Interaction
+from recbole.data import (
+    create_dataset,
+    data_preparation
+)
+from recbole.utils import (
+    init_logger,
+    init_seed
+)
 
 def get_model(inp_model):
 
@@ -34,12 +43,33 @@ def get_model(inp_model):
         model = DeepFM
         
     if inp_model == 'EASE':
-        from recbole.model.general_recommender.ease import EASE
+        from models.ease import EASE
         model = EASE
-
 
     return model
 
+
+def load_data_and_model_ih(model_file,inp_model):
+
+    checkpoint = torch.load(model_file)
+    config = checkpoint["config"]
+    init_seed(config["seed"], config["reproducibility"])
+    init_logger(config)
+    logger = getLogger()
+    logger.info(config)
+
+    dataset = create_dataset(config)
+    logger.info(dataset)
+    train_data, valid_data, test_data = data_preparation(config, dataset)
+
+    init_seed(config["seed"], config["reproducibility"])
+
+    inp_model = get_model(inp_model)
+    model = inp_model(config, train_data.dataset).to(config["device"])
+    model.load_state_dict(checkpoint["state_dict"])
+    model.load_other_parameter(checkpoint.get("other_parameter"))
+
+    return config, model, dataset
 
 
 # ref : https://www.kaggle.com/code/astrung/recbole-using-all-items-for-prediction/notebook

@@ -2,11 +2,13 @@ import pandas as pd
 # Import TfIdfVectorizer from scikit-learn
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
+import os
 
+CUR_PATH = os.getcwd()
 
 def load_data():
-    data_advanced = pd.read_csv('/opt/ml/한국사작업/scrap_deep/data_advanced.csv')
-    data_basic = pd.read_csv('/opt/ml/한국사작업/scrap_basic/data_basic.csv')
+    data_advanced = pd.read_csv(CUR_PATH+'/app/data_advanced.csv')
+    data_basic = pd.read_csv(CUR_PATH+'/app/data_basic.csv')
     tfidf_advanced = TfidfVectorizer() #Tfidf 벡터화
     tfidf_basic = TfidfVectorizer()
     tfidf_matrix_advanced = tfidf_advanced.fit_transform(data_advanced['keyword']) # 해설내용  sparse - matrix 생성

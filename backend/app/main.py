@@ -5,15 +5,18 @@ from uuid import UUID, uuid4
 from typing import List, Union, Optional, Dict, Any
 
 from datetime import datetime
-from app.firebase_db import load_database, get_user_solved, get_dataframe, get_full_problemCode, get_tfidf_dataset
+from app.firebase_db import load_database, get_user_solved, get_user_solved_seq, get_dataframe, get_full_problemCode, get_problem_similar
 from collections import defaultdict
 
 import requests
 import json
 import random
 from app.model import load_data, tfidf_recommender
-from my_inference import inference_main
+from my_inference import inference_main, inference_seq
 from starlette.middleware.cors import CORSMiddleware
+
+import os
+
 
 origins = [
     "*"
@@ -33,7 +36,6 @@ app.add_middleware(
 
 
 db = load_database()
-idx_basic, cos_sim_basic, data_basic, idx_advanced, cos_sim_advanced, data_advanced = load_data()
 basic_lst, advanced_lst = get_full_problemCode(db)
 
 @app.get("/")
@@ -45,15 +47,6 @@ class solved_data(BaseModel):
     rec_lst : list
     # selected_count : int
     
-    
-class Database(BaseModel):
-    isCorrect : bool
-    problemCode : str
-    selected : int
-    solvedAt : str
-    testMode : bool
-    timetaken : int
-    userUID : UUID
 
 class userID(BaseModel):
     userUID : str
@@ -69,12 +62,12 @@ async def get_solved(user_id: str,level:str):
 
 @app.get("/model/{level}/{userUID}", description="난이도와 유저를 입력하면 추천 리스트를 가져옵니다.")
 async def get_model_output(level:str,userUID:str):
-    model_lst = ["tfidf",'ease']
-    model_name = random.sample(model_lst,1)[0]
-    # solved_lst = get_user_solved(db,userUID,False)
+    random.seed() # 랜덤시드를 풀어줌으로서 고정되는 문제 해결
+    model_lst = ['tfidf','EASE','SASRec']
+    model_name = random.sample(model_lst, 1)[0]
 
     if level == 'basic': 
-        solved_lst = get_tfidf_dataset(db, userUID, level)   
+        solved_lst = get_user_solved(db, userUID, level, n = 20, full = False)   
 
         if not solved_lst:
             return {f"{userUID}가 푼 문제는 없습니다."}
@@ -82,7 +75,7 @@ async def get_model_output(level:str,userUID:str):
         else:
             lst = []
             for problem in solved_lst:
-                lst.extend(random.sample(tfidf_recommender(problem, idx_basic, cos_sim_basic, data_basic, idx_advanced, cos_sim_advanced, data_advanced),1))
+                lst.extend(random.sample(get_problem_similar(db,problem),1))
         
         n = 5 if len(solved_lst)>=5 else len(solved_lst)
         lst = random.sample(lst,n)
@@ -93,14 +86,14 @@ async def get_model_output(level:str,userUID:str):
 
     else:
         if model_name == "tfidf": 
-            solved_lst = get_tfidf_dataset(db, userUID, level)   
+            solved_lst = get_user_solved(db, userUID, level, n = 20, full = False)   
 
             if not solved_lst:
                 return {f"{userUID}가 푼 문제는 없습니다."}
             else:
                 lst = []
                 for problem in solved_lst:
-                    lst.extend(random.sample(tfidf_recommender(problem, idx_basic, cos_sim_basic, data_basic, idx_advanced, cos_sim_advanced, data_advanced),1))
+                    lst.extend(random.sample(get_problem_similar(db,problem),1))
             
             n = 5 if len(solved_lst)>=5 else len(solved_lst)
             lst = random.sample(lst,n)
@@ -109,58 +102,29 @@ async def get_model_output(level:str,userUID:str):
             rec_dict["tfidf"]['random'] = random.sample(advanced_lst,10-len(lst))
             return rec_dict
         
-        elif model_name == "ease":
-            model_path = '/opt/ml/backend/saved/EASE-Feb-02-2023_10-00-01.pth'
-            user_problem_lst = get_user_solved(db, userUID, level, False)
+        elif model_name == "EASE":
+            model_path = os.getcwd()+'/saved/EASE-Feb-03-2023_05-57-16.pth'
+            user_problem_lst = get_user_solved(db, userUID, level, full = False)
             
-            result = inference_main(userUID, user_problem_lst, model_path)
-            
+            result = inference_main(userUID, user_problem_lst, model_path, model_name)
+            random.seed()
             rec_dict = {model_name:{}}
             rec_dict[model_name]['recommend'] = result
             rec_dict[model_name]['random'] = random.sample(advanced_lst,10-len(result))
             return rec_dict
-        else:
-            pass
-
-    
-
-"""
-기본 문제 추천 : tfidf
-심화 문제 추천 : tfidf <- 최근에 틀린 문제로 랜덤 샘플
-                model <- 최근에 푼 문제 100개를 inference해서 리턴
-
-model 별로 구현하면 되겠다!!
-"""
-
-
-
-
-
-# @app.post("/model", description="해당 유저에 맞는 추천 결과를 가져옵니다.")
-# async def get_model_output(data:userID):
-#     with open('/opt/ml/한국사작업/모델예축값/모델예축값_2023-01-30 12:43:29.json','r',encoding='utf-8') as f:
-#         pred = json.load(f)
-#         return pred[data.userUID]
-
-
-
-# @app.post("/tfidf", description="유저가 최근 틀린 문제 20개와 유사한 문제를 가져옵니다.")
-# async def make_order(data:userID):
-#     incorrect_answer_lst = get_user_solved(db,data.userUID)
-
-#     if not incorrect_answer_lst:
-#         return {f"{data.userUID}가 틀린 문제는 없습니다."}
-#     else:
-#         lst = []
-#         for problem in incorrect_answer_lst:
-#             lst.extend(random.sample(tfidf_recommender(problem, idx, cos_sim, sim_data),1))
         
-#         rec_dict = {}
-#         if len(lst) < 5:
-#             rec_dict['recommend'] = lst
-#             rec_dict['random'] = random.sample(problem_lst,10-len(lst))
-#         else:
-#             rec_dict['recommend'] = random.sample(lst,5)
-#             rec_dict['random'] = random.sample(problem_lst,5)
+        elif model_name == "SASRec":
+            try:
+                model_path = os.getcwd()+'/saved/SASRec-Feb-03-2023_09-21-56.pth'
+                user_df = get_user_solved_seq(db, userUID, level)
 
-#         return rec_dict
+                result = inference_seq(userUID, user_df, model_path)
+                random.seed()
+                rec_dict = {model_name:{}}
+                rec_dict[model_name]['recommend'] = result
+                rec_dict[model_name]['random'] = random.sample(advanced_lst,10-len(result))
+                return rec_dict
+            except:
+                return {f"{userUID}의 데이터가 충분하지 않습니다. sasrec error."}
+
+   

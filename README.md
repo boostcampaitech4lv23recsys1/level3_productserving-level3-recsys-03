@@ -13,7 +13,7 @@ _"한국사능력검정시험 年 4회→6회 확대" 「서울신문」, 2019�
 
 ---
 
-## **“당신을 위한 한국사능력검정시험 문제 추천 AI - 길동국사" [[바로가기]](http://길동국사.com)**
+## **“당신을 위한 한국사능력검정시험 문제 추천 AI - 길동국사" <a href="http://길동국사.com" target="_blank">[바로가기]</a>**
 
 ![길동국사_readme](https://user-images.githubusercontent.com/107118671/214787068-d8a2f9c8-992a-4b36-8e03-09587174f70f.png)
 <br/>
@@ -27,37 +27,27 @@ _"한국사능력검정시험 年 4회→6회 확대" 「서울신문」, 2019�
 <table>
    <tr height="160px">
       <td align="center">
-         <a href="https://github.com/snuff12">
-            <img src="https://user-images.githubusercontent.com/107118671/217153243-61a5779a-884c-4c38-be1d-b4af4a208033.png" width="150" height="150"/>
-         </a>
+         <img src="https://user-images.githubusercontent.com/107118671/217153243-61a5779a-884c-4c38-be1d-b4af4a208033.png" width="150" height="150"/>
       </td>
       <td align="center">
-         <a href="https://github.com/TaeYupNoh">
-            <img src="https://user-images.githubusercontent.com/107118671/217152986-cfa162d0-9fd9-43b7-8366-b40edddbb846.png" width="150" height="150"/>
-         </a>
+         <img src="https://user-images.githubusercontent.com/107118671/217152986-cfa162d0-9fd9-43b7-8366-b40edddbb846.png" width="150" height="150"/>
       </td>
       <td align="center">
-         <a href="https://github.com/9hyeok">
-            <img src="https://user-images.githubusercontent.com/107118671/217153860-e06e5a14-61a3-4857-9c79-84bda4e62015.png" width="150" height="150"/>
-         </a>
+         <img src="https://user-images.githubusercontent.com/107118671/217153860-e06e5a14-61a3-4857-9c79-84bda4e62015.png" width="150" height="150"/>
       </td>
        <td align="center">
-         <a href="https://github.com/hoeen">
-            <img src="https://user-images.githubusercontent.com/107118671/217153463-cc6c7551-f770-4cb3-af3e-f9a44d4df940.png" width="150" height="150"/>
-         </a>
+         <img src="https://user-images.githubusercontent.com/107118671/217153463-cc6c7551-f770-4cb3-af3e-f9a44d4df940.png" width="150" height="150"/>
       </td>
       <td align="center">
-         <a href="https://github.com/hiidy">
-            <img src="https://user-images.githubusercontent.com/107118671/217153320-4262b830-ea4c-480a-a8eb-04341a8df1c0.png" width="150" height="150"/>
-         </a>
+         <img src="https://user-images.githubusercontent.com/107118671/217153320-4262b830-ea4c-480a-a8eb-04341a8df1c0.png" width="150" height="150"/>
       </td>
    </tr>
    <tr>
-       <td align="center"><a href="https://github.com/snuff12"><b>김선도</b></a></td>
-       <td align="center"><a href="https://github.com/TaeYupNoh"><b>노태엽</b></a></td>
-       <td align="center"><a href="https://github.com/9hyeok"><b>나인혁</b></a></td>
-      <td align="center"><a href="https://github.com/hoeen"><b>박우석</b></a></td>
-       <td align="center"><a href="https://github.com/hiidy"><b>전병웅</b></a></td>
+       <td align="center"><a href="https://github.com/snuff12" target="_blank"><b>김선도</b></a></td>
+       <td align="center"><a href="https://github.com/TaeYupNoh" target="_blank"><b>노태엽</b></a></td>
+       <td align="center"><a href="https://github.com/9hyeok" target="_blank"><b>나인혁</b></a></td>
+      <td align="center"><a href="https://github.com/hoeen" target="_blank"><b>박우석</b></a></td>
+       <td align="center"><a href="https://github.com/hiidy" target="_blank"><b>전병웅</b></a></td>
    </tr>
    <tr>
       <td align="center">역할<br/></td>
@@ -74,10 +64,12 @@ _"한국사능력검정시험 年 4회→6회 확대" 「서울신문」, 2019�
 
 ## 1. 소개
 
-[🎭 길동국사 보러가기](http://길동국사.com)
+<a href="http://길동국사.com" target="_blank">🎭 길동국사 보러가기</a>
 
 ```
-한국사능력검정시험은 공무원 시험, 공기업 취업 등에 가산점으로 활용되며, 현재 연간 50만명 이상 응시할 정도로 지원자가 늘어나고 있습니다.
+한국사능력검정시험은 대한민국 교육부 산하의 국사편찬위원회가 주관하는 한국사 시험입니다.
+
+주로 공무원 시험, 공기업 취업 등에 가산점으로 활용되며 현재 연간 50만 명이 응시하는 큰 시험입니다.
 
 길동국사는 한국사능력검정시험을 준비하는 모든 수험생을 돕고자 시작한 서비스입니다.
 
@@ -85,7 +77,7 @@ _"한국사능력검정시험 年 4회→6회 확대" 「서울신문」, 2019�
 
 길동국사는 사용자의 다양한 피드백을 적극적으로 수용하여 지속적인 개선이 이루어지고 있습니다.
 
-그럼, 길동국사의 주요 기능을 간략히 소개하겠습니다!
+그럼, 길동국사의 주요 기능을 간략히 소개하겠습니다.
 ```
 
 #### (1) 기출문제

@@ -50,6 +50,7 @@ function RecSolve(props: { pArray: Array<string>; model: string }) {
   const userUID = useRecoilValue(userUIDAtom);
   const isFullTest = useRecoilValue(isFullTestAtom);
   const setIsDialogOpen = useSetRecoilState(isDialogOpenAtom);
+  const setIsSolving = useSetRecoilState(isSolvingAtom);
   const [pointer, setPointer] = useState("all");
   const [startTime, setStartTime] = useState(new Date().getTime());
   const [isEraseMode, setIsEraseMode] = useState(false);
@@ -281,7 +282,11 @@ function RecSolve(props: { pArray: Array<string>; model: string }) {
         </Button>
         <Button
           variant="contained"
-          onClick={() => setIsDialogOpen(false)}
+          onClick={() => {
+            setIsDialogOpen(false);
+            setIsSolving(false);
+            window.location.reload();
+          }}
           style={{ width: "20%", fontSize: "10%", marginLeft: "5px" }}
         >
           나가기
@@ -299,6 +304,7 @@ function RecSolve(props: { pArray: Array<string>; model: string }) {
               setSelected(0);
             } else {
               setIsDialogOpen(false);
+              setIsSolving(false)
             }
           }}
           aria-labelledby="alert-dialog-title"

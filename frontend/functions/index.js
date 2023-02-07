@@ -7,7 +7,7 @@ exports.getRecentSolved = functions.https.onRequest((req, res) => {
   cors(req, res, () => {
     functions.logger.info("Hello logs!", {structuredData: true});
     client.get(
-        `http://27.96.130.82:30001/db${req.originalUrl}/advanced`,
+        `http://27.96.130.82:30002/db${req.originalUrl}/advanced`,
         function(data, response) {
           console.log(data, response);
           res.send(data);
@@ -20,7 +20,7 @@ exports.getRecProblems = functions.https.onRequest((req, res) => {
   cors(req, res, () => {
     functions.logger.info("Hello logs!", {structuredData: true});
     client.get(
-        `http://27.96.130.82:30001/model/advanced${req.originalUrl}`,
+        `http://27.96.130.82:30002/model/advanced${req.originalUrl}`,
         function(data, response) {
           console.log(data, response);
           res.send(data);

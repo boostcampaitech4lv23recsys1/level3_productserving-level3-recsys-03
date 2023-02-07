@@ -36,7 +36,7 @@ function AI() {
   }, []);
 
   useEffect(() => {
-    if (recProblem.length===10 && !isDialogOpen) {
+    if (recProblem.length === 10 && !isDialogOpen) {
       setIsLoading(true);
       setIsDialogOpen(true);
     }
@@ -123,7 +123,10 @@ function AI() {
       <Dialog
         fullWidth
         open={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
+        onClose={() => {
+          setIsDialogOpen(false);
+          window.location.reload();
+        }}
       >
         <RecSolve pArray={recProblem} model={model} />
       </Dialog>

@@ -13,7 +13,7 @@ class EASE(nn.Module):
         self.user_enc = LabelEncoder()
         self.item_enc = LabelEncoder()
 
-    def fit(self, data, df, lambda_: float = 0.5, implicit=True):
+    def fit(self, data, df, lambda_: float = 0.5, implicit=False):
         self.user_enc.fit(data.loc[:, 'user'])
         self.item_enc.fit(data.loc[:, 'item'])
         

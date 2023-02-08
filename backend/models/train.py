@@ -3,6 +3,12 @@ import numpy as np
 import sys
 import pickle
 import torch
+
+import argparse
+
+from preprocess import data_augmentation
+
+
 sys.path.append('/opt/ml/level3_productserving-level3-recsys-03/backend')
 
 from model import EASE
@@ -50,23 +56,42 @@ def Recall_at_k_batch(result_df, test_df_te, k=10):
     return recall_k
 
 
-def main(lambd, k):
-    df = get_dataframe(load_database())[['userUID','problemCode','isCorrect']]
+def main():
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--data_aug", default = True, type=bool)
+    parser.add_argument("--lambd", default=500, type = float)
+    parser.add_argument("--top_k", default=10, type=int)
+
+    args = parser.parse_args()
+
+    db = load_database()
+    df = get_dataframe(db)
+
+    if args.data_aug:
+        df = data_augmentation.preprocess(df, db) # Data Augmentation
+
+
+    df = df[['userUID','problemCode','isCorrect']]
+    df = df[df.problemCode.apply(lambda x: True if x[0] == 'a' else False)]
     df = df.drop_duplicates(subset=['userUID','problemCode'],
                                 keep='last')
     df= df[df.userUID.map((df.userUID.value_counts()>=5).to_dict())]
     df.columns = ['user','item','rating']
+    df['rating'] = df['rating'].apply(lambda x: 0 if x else 1)
 
     items = df["item"].unique()
     
     train_df, test_df = split_train_test_proportion(df)
 
     model = EASE()
-    model.fit(df, train_df, lambda_= lambd)
- 
-    result_df = model.predict(train_df, train_df.user.unique(), items, k)
+    model.fit(df, train_df, lambda_= args.lambd)
+    
+    result_df = model.predict(train_df, train_df.user.unique(), items, args.top_k)
+    test_df = test_df[test_df.rating == 1]
     recall = Recall_at_k_batch(result_df[["user", "item"]], test_df[["user", "item"]])
-    print(f"recall@{k} : {recall}")
+    print(f"recall@{args.top_k} : {recall}")
 
     model_dict = {}
     model_dict['B'] = model.B
@@ -79,6 +104,6 @@ def main(lambd, k):
 
 
 if __name__ == "__main__":
-    main(500, 10)
+    main()
     
 

@@ -1,4 +1,3 @@
-import pandas as pd
 import numpy as np
 import torch
 import pickle
@@ -34,9 +33,5 @@ def inference_main(user_problem_lst, model_path):
         np.arange(len(rating_pred))[:, None], arr_ind_argsort
     ][0])
     batch_pred_list = list(map((lambda x : model_dict['id2token'][x]),batch_pred_list))
-
+    print('good')
     return batch_pred_list   
-0.
-
-a = inference_main(['advanced4708', 'advanced4718', 'advanced4711', 'advanced4723', 'advanced4712'], '/opt/ml/level3_productserving-level3-recsys-03/backend/saved/ease_dict.pkl')
-print(a)

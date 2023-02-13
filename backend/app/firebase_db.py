@@ -1,30 +1,72 @@
-import sqlalchemy
 import pandas as pd
+import os
 from sqlalchemy import create_engine
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 
 
-## 데이터베이스 연결
 def load_database():
-    host="ls-9c67b50f3b1170eaac8f789675e5ef3b638eeb6f.cnzorxtg2img.ap-northeast-2.rds.amazonaws.com"
-    dbname="gildong-database"
-    user="dbmasteruser"
-    password="fiveguys!!!"
+    KEY_PATH = os.getcwd()+'/key/'
+    private_ket = KEY_PATH + os.listdir(KEY_PATH)[0]
+    cred = credentials.Certificate(private_ket)
+    firebase_admin.initialize_app(cred)
+    db = firestore.client()
+    return db
+
+## 데이터베이스 연결
+def pg_load_database():
+    host = "****"
+    dbname = "****"
+    user = "****"
+    password = "****"
     port=5432
     db = create_engine(f"postgresql://{user}:{password}@{host}:{port}/{dbname}")
     return db
 
 
-## log 데이터 불러오기
 def get_dataframe(db):
+    users_ref = db.collection(u'logs').document(u'solved')
+    users_ref2 = db.collection(u'logs2').document(u'solved')
+    # docs = users_ref.stream()
+    lst = users_ref.get().to_dict()['solved']
+    lst2 = users_ref2.get().to_dict()['solved']
+    df = pd.DataFrame(lst) #유저 로그 정보가 담긴 데이터프레임
+    df2 = pd.DataFrame(lst2)
+    df = pd.concat([df,df2]).reset_index(drop=True)
+    return df
+
+## log 데이터 불러오기
+def pg_get_dataframe(db):
     df = pd.read_sql("select * from log", db)
     return df
-    
 
-# 해당 유저가 최근에 푼 문제 n개 리턴 (n개 중 틀린 것만 가져오기 가능 )
-def get_user_solved(db, user_id, level, n = 100, full = True):
+
+# firebase 버전 - 해당 유저가 최근에 푼 문제 100개 리턴 
+def get_user_solved(db, user_id, level, n=100, full = True):
+    df = get_dataframe(db)
+    df = df.sort_values(['userUID','solvedAt'])
+    df = df.drop_duplicates(subset=['userUID','problemCode'],
+                                keep='last')
+    sample_df = df[df.userUID == user_id] # 해당 유저가 최근에 푼 문제 
+
+    if level == "advanced": 
+        sample_df = sample_df[sample_df.problemCode.apply(lambda x: True if x[0] == 'a' else False)]
+    elif level == "basic":
+        sample_df = sample_df[sample_df.problemCode.apply(lambda x: True if x[0] == 'b' else False)]
+    else:
+        pass
+
+    if len(sample_df) >= n:
+        sample_df = sample_df.iloc[-n:,:]
+
+    if not full:
+        sample_df = sample_df[sample_df.isCorrect == False]
+    
+    return list(sample_df.problemCode.values)
+
+# postgresql db 버전 - 해당 유저가 최근에 푼 문제 n개 리턴 (n개 중 틀린 것만 가져오기 가능 )
+def pg_get_user_solved(db, user_id, level, n = 100, full = True):
     if level == 'advanced':
         sub_q = "AND LEFT(\"problemCode\",1) = \'a\'"
     elif level == 'basic':
@@ -52,35 +94,6 @@ def get_user_solved(db, user_id, level, n = 100, full = True):
     return list(df.problemCode.values)
 
 
-
-## sequence data 
-def get_user_solved_seq(db, user_id, level):
-    df = get_dataframe(db)
-    df = df.loc[:, ['userUID', 'problemCode', 'isCorrect', 'solvedAt']]
-    df['isCorrect'] = df['isCorrect'].apply(int)
-    df = df.drop_duplicates(subset=['userUID','problemCode'],
-                                keep='last')
-    
-    sample_df = df[df.userUID == user_id] 
-
-    if level == "advanced": 
-        sample_df = sample_df[sample_df.problemCode.apply(lambda x: True if x[0] == 'a' else False)]
-    elif level == "basic":
-        sample_df = sample_df[sample_df.problemCode.apply(lambda x: True if x[0] == 'b' else False)]
-    else:
-        pass
-
-    sample_df = sample_df.rename(columns={'userUID':'user_id',
-                    'problemCode':'item_id',
-                    'isCorrect':'rating',
-                    'solvedAt':'timestamp'
-                    })
-    # 0 - 1 switching
-    sample_df['rating'] = sample_df['rating'].apply(lambda x: 0 if x==1 else 1)
-
-    return sample_df
-
-
 # 전체 문제 리스트 가져오기
 def get_full_problemCode(db):
     advanced_q = '''SELECT "problemCode" 
@@ -98,3 +111,6 @@ def get_full_problemCode(db):
 def get_problem_similar(db,problemCode):
     q = f"select * from problems where \"problemCode\" = \'{problemCode}\'"
     return pd.read_sql(q,db).similar[0]
+
+
+

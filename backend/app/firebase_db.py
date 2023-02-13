@@ -1,16 +1,29 @@
 import pandas as pd
-import requests
+import os
+from sqlalchemy import create_engine
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 
-def load_database():
 
-    private_ket = '/opt/ml/backend/key/gildong-k-history-firebase-adminsdk-i7q1c-f7652da7b0.json'
+def load_database():
+    KEY_PATH = os.getcwd()+'/key/'
+    private_ket = KEY_PATH + os.listdir(KEY_PATH)[0]
     cred = credentials.Certificate(private_ket)
     firebase_admin.initialize_app(cred)
     db = firestore.client()
     return db
+
+## 데이터베이스 연결
+def pg_load_database():
+    host = "****"
+    dbname = "****"
+    user = "****"
+    password = "****"
+    port=5432
+    db = create_engine(f"postgresql://{user}:{password}@{host}:{port}/{dbname}")
+    return db
+
 
 def get_dataframe(db):
     users_ref = db.collection(u'logs').document(u'solved')
@@ -22,14 +35,20 @@ def get_dataframe(db):
     df2 = pd.DataFrame(lst2)
     df = pd.concat([df,df2]).reset_index(drop=True)
     return df
-    
 
-# 해당 유저가 최근에 푼 문제 100개 리턴 
-def get_user_solved(db, user_id, level, full = True):
+## log 데이터 불러오기
+def pg_get_dataframe(db):
+    df = pd.read_sql("select * from log", db)
+    return df
+
+
+# firebase 버전 - 해당 유저가 최근에 푼 문제 100개 리턴 
+def get_user_solved(db, user_id, level, n=100, full = True):
     df = get_dataframe(db)
+    df = df.sort_values(['userUID','solvedAt'])
     df = df.drop_duplicates(subset=['userUID','problemCode'],
                                 keep='last')
-    sample_df = df[df.userUID == user_id] # 해당 유저가 최근에 푼 문제
+    sample_df = df[df.userUID == user_id] # 해당 유저가 최근에 푼 문제 
 
     if level == "advanced": 
         sample_df = sample_df[sample_df.problemCode.apply(lambda x: True if x[0] == 'a' else False)]
@@ -37,79 +56,61 @@ def get_user_solved(db, user_id, level, full = True):
         sample_df = sample_df[sample_df.problemCode.apply(lambda x: True if x[0] == 'b' else False)]
     else:
         pass
-    
+
+    if len(sample_df) >= n:
+        sample_df = sample_df.iloc[-n:,:]
+
     if not full:
         sample_df = sample_df[sample_df.isCorrect == False]
+    
+    return list(sample_df.problemCode.values)
 
-    # 해당 유저가 최근 푼 문제 100개 리턴 
-    # 100개 미만이면 푼 만큼 리턴 
-    if len(sample_df) < 100:
-        return list(sample_df.problemCode.values)
-        # return {'problemCode' : list(sample_df.problemCode.values), "isCorrect" : list(sample_df.isCorrect.values)}  # df에서 dict로 바꾸어줌 
-    else: 
-        return list(sample_df.problemCode[-100:].values)
-        # return {'problemCode' : list(sample_df.problemCode[-100:].values), "isCorrect" : list(sample_df.isCorrect[-100:].values)}
-
-
-# def get_user_advanced_solved(db, user_id, iscorrect = True):
-#     df = get_advanced_dataset(db)
-
-#     if iscorrect:
-#         sample_df = df[df.userUID == user_id] # 해당 유저가 최근에 푼 문제 전체
-#         # 해당 유저가 최근 푼 문제 100개 리턴 
-#         # 100개 미만이면 푼 만큼 리턴 
-#         if len(sample_df) < 20:
-#             return list(sample_df.problemCode.values)   
-#         else: 
-#             return list(sample_df.problemCode[-20:].values)
-
-#     else:
-#         sample_df = df[(df.userUID == user_id)&(df.isCorrect == False)] # 해당 유저가 최근에 틀린 문제제
-
-#         # 해당 유저가 최근 푼 문제 100개 리턴 
-#         # 100개 미만이면 푼 만큼 리턴 
-#         if len(sample_df) < 100:
-#             return list(sample_df.problemCode.values)   
-#         else: 
-#             return list(sample_df.problemCode[-100:].values)
-
-
-# 심화 문제 풀이 데이터를 가져옵니다.
-def get_tfidf_dataset(db, user_id, level):
-    df = get_dataframe(db)
-    df = df.drop_duplicates(subset=['userUID','problemCode'],
-                                keep='last')
-    sample_df = df[(df.userUID == user_id)&(df.isCorrect == False)] # 해당 유저가 최근에 틀린 문제
-    if level == "advanced": 
-        sample_df = sample_df[sample_df.problemCode.apply(lambda x: True if x[0] == 'a' else False)]
+# postgresql db 버전 - 해당 유저가 최근에 푼 문제 n개 리턴 (n개 중 틀린 것만 가져오기 가능 )
+def pg_get_user_solved(db, user_id, level, n = 100, full = True):
+    if level == 'advanced':
+        sub_q = "AND LEFT(\"problemCode\",1) = \'a\'"
+    elif level == 'basic':
+        sub_q = "AND LEFT(\"problemCode\",1) = \'b\'"
     else:
-        sample_df = sample_df[sample_df.problemCode.apply(lambda x: True if x[0] == 'b' else False)]
+        sub_q = ""
 
-    # 해당 유저가 최근 틀린 문제 20개 리턴 
-    # 20개 미만이면 틀린 만큼 리턴 
-    if len(sample_df) < 20:
-        return list(sample_df.problemCode.values)   
-    else: 
-        return list(sample_df.problemCode[-20:].values)
+    if not full:
+        sub_q += "AND \"isCorrect\" = false"
+
+    q = f'''SELECT t2."problemCode"
+            FROM (
+                SELECT *
+                FROM (
+                    SELECT ROW_NUMBER() OVER (PARTITION BY "userUID","problemCode" ORDER BY "solvedAt" DESC) as idx,* 
+                    FROM log WHERE "userUID" = \'{user_id}\' {sub_q} 
+                    ORDER BY "solvedAt" DESC
+                ) as t1
+                WHERE t1.idx = 1
+                LIMIT {n}
+            ) as t2
+            ORDER BY t2."solvedAt"
+    '''
+    df =pd.read_sql(q,db)
+    return list(df.problemCode.values)
 
 
-def get_model_dataset(db, user_id, level):
-    df = get_dataframe(db)
-    df = df.drop_duplicates(subset=['userUID','problemCode'],
-                                keep='last')
-    df = df[df.problemCode.apply(lambda x: True if x[0] == 'a' else False)]
-    return df
-
-
+# 전체 문제 리스트 가져오기
 def get_full_problemCode(db):
-    users_ref = db.collection(u'problems')
-    docs = users_ref.stream()
-    advanced_lst = []
-    basic_lst = []
-    for i in docs:
-        if i.id != "기본4701":
-            if i.id[0] == 'a':
-                advanced_lst.append(i.id)
-            else:
-                basic_lst.append(i.id) 
-    return basic_lst, advanced_lst
+    advanced_q = '''SELECT "problemCode" 
+        FROM problems
+        WHERE LEFT(\"problemCode\",1) = \'a\'
+        '''
+    basic_q = '''SELECT "problemCode" 
+        FROM problems
+        WHERE LEFT(\"problemCode\",1) = \'b\'
+        '''
+    return list(pd.read_sql(basic_q,db).problemCode.values), list(pd.read_sql(advanced_q,db).problemCode.values)
+
+
+# 유사 문제 5개 가져오기
+def get_problem_similar(db,problemCode):
+    q = f"select * from problems where \"problemCode\" = \'{problemCode}\'"
+    return pd.read_sql(q,db).similar[0]
+
+
+

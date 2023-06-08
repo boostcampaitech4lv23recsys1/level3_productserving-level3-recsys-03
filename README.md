@@ -196,7 +196,7 @@ Airflow : Continuous Integration
 - (2) 불용어 전처리 후 TF-IDF로 임베딩
 - (3) 임베딩된 벡터끼리의 코사인 유사도를 구하는 방식으로 Top-K 문제를 사용자에게 추천
 
-### (3) ESAE
+### (3) EASE
 
 <img width="600" alt="image" src="https://user-images.githubusercontent.com/107118671/217979629-1f332a05-748a-43d1-816a-3e8400c6f499.png">
 
